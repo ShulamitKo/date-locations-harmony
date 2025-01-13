@@ -227,22 +227,23 @@ export default function HomePage() {
       }, 850);
     }
 
-    // Find and scroll to the spot in the list
-    const spotElement = document.getElementById(`spot-${spot.id}`);
-    if (spotElement) {
-      spotElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
+    // בדסקטופ נגלול לכרטיסיה
+    if (window.innerWidth > 768) {
+      const spotElement = document.getElementById(`spot-${spot.id}`);
+      if (spotElement) {
+        spotElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
 
-      // מוודאים שהאלמנט מקבל פוקוס אחרי שהגלילה הסתיימה
-      setTimeout(() => {
-        spotElement.focus({ preventScroll: true });
-        spotElement.classList.add('spot-highlight');
         setTimeout(() => {
-          spotElement.classList.remove('spot-highlight');
-        }, 2000);
-      }, 800); // מחכים שהגלילה תסתיים
+          spotElement.focus({ preventScroll: true });
+          spotElement.classList.add('spot-highlight');
+          setTimeout(() => {
+            spotElement.classList.remove('spot-highlight');
+          }, 2000);
+        }, 800);
+      }
     }
   };
 
@@ -525,9 +526,15 @@ export default function HomePage() {
                       <SpotCard
                         spot={spot}
                         onClick={() => {
-                          if (window.innerWidth < 640) { // sm breakpoint
-                            navigate(`/spot/${spot.id}`);
+                          if (window.innerWidth <= 768) {
+                            // במובייל - ההתנהגות תלויה בסוג התצוגה
+                            if (viewMode === 'map') {
+                              handleSpotClick(spot);
+                            } else {
+                              navigate(`/spot/${spot.id}`);
+                            }
                           } else {
+                            // בדסקטופ - תמיד נתמקד במיקום
                             handleSpotClick(spot);
                           }
                         }}
@@ -548,14 +555,27 @@ export default function HomePage() {
               sm:block sm:h-auto
             `}>
                 <MapContainer
-                ref={mapRef}
+                  ref={mapRef}
                   center={[31.7683, 35.2137]}
-                zoom={13}
-                className="h-full w-full"
+                  zoom={13}
+                  className="h-full w-full"
+                  minZoom={6}
+                  maxZoom={18}
+                  zoomControl={false}
+                  attributionControl={false}
+                  scrollWheelZoom={true}
+                  doubleClickZoom={true}
+                  dragging={true}
+                  preferCanvas={true}
+                  style={{ height: '100%', width: '100%' }}
                 >
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    maxNativeZoom={18}
+                    maxZoom={18}
+                    tileSize={256}
+                    keepBuffer={2}
                   />
                   <MapBoundsHandler spots={filteredSpots} />
                   {filteredSpots.map(spot => {

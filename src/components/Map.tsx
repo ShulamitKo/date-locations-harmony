@@ -134,6 +134,15 @@ export default function Map({ spots = [], center = [32.0853, 34.7818], zoom = 12
         center={center}
         zoom={zoom}
         className="w-full h-full"
+        minZoom={6}
+        maxZoom={18}
+        maxBounds={[[29.3, 33.0], [34.0, 36.0]]}
+        zoomControl={true}
+        scrollWheelZoom="center"
+        doubleClickZoom="center"
+        dragging={true}
+        keyboard={true}
+        attributionControl={true}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

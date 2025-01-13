@@ -84,3 +84,73 @@
 .spot-highlight {
   animation: highlight 1s ease-in-out;
 }
+
+/* Map Mobile Styles */
+@media (max-width: 768px) {
+  .leaflet-container {
+    touch-action: none;
+    height: 100% !important;
+    width: 100% !important;
+    -webkit-tap-highlight-color: transparent;
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+  }
+
+  .leaflet-touch .leaflet-control-zoom {
+    left: 10px !important;
+    right: auto !important;
+  }
+
+  .leaflet-popup-content {
+    margin: 13px 10px;
+    min-width: 200px;
+  }
+
+  .leaflet-popup-content p {
+    margin: 8px 0;
+  }
+
+  .leaflet-touch .leaflet-bar {
+    border: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  .leaflet-touch .leaflet-bar a {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+  }
+
+  /* שיפור ביצועים */
+  .leaflet-fade-anim .leaflet-tile,
+  .leaflet-fade-anim .leaflet-popup {
+    will-change: opacity;
+  }
+  
+  .leaflet-zoom-anim .leaflet-zoom-animated {
+    will-change: transform;
+  }
+
+  /* מניעת פליקרים */
+  .leaflet-container {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
+  /* שיפור תצוגת טיילים */
+  .leaflet-tile {
+    filter: none !important;
+    visibility: visible !important;
+  }
+
+  /* שיפור מגע */
+  .leaflet-touch .leaflet-control-layers,
+  .leaflet-touch .leaflet-bar {
+    border: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+}
