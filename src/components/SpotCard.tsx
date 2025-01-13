@@ -1,67 +1,75 @@
-import { Link } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Phone, Globe, Clock } from "lucide-react";
+
+import {  Coffee, Utensils, Beer, Sparkles, MoreHorizontal } from "lucide-react";
 import type { Spot } from "@/lib/supabase/types";
-import { getCategoryDisplay, getKosherTypeDisplay, getPriceRangeDisplay } from "@/lib/utils";
+
+const categoryIcons = {
+  cafe: Coffee,
+  restaurant: Utensils,
+  bar: Beer,
+  activity: Sparkles,
+  other: MoreHorizontal
+};
 
 interface SpotCardProps {
   spot: Spot;
+  onClick?: () => void;
+  isSelected?: boolean;
+  distance?: string | null;
+  compact?: boolean;
 }
 
-export default function SpotCard({ spot }: SpotCardProps) {
+export default function SpotCard({ spot, onClick, isSelected, distance, compact }: SpotCardProps) {
+  const CategoryIcon = categoryIcons[spot.category];
+
   return (
-    <Link to={`/spot/${spot.id}`}>
-      <Card className="h-full hover:shadow-lg transition-shadow">
-        <CardContent className="p-4">
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-xl font-bold">{spot.name}</h3>
-              <p className="text-gray-600">{spot.address}</p>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">{getCategoryDisplay(spot.category)}</Badge>
-              <Badge variant="outline">{getKosherTypeDisplay(spot.kosher_type)}</Badge>
-              <Badge variant="outline">{getPriceRangeDisplay(spot.price_range)}</Badge>
-              {spot.suitable_for_first_date && (
-                <Badge variant="outline" className="bg-green-50">
-                  מתאים לדייט ראשון
-                </Badge>
-              )}
-            </div>
-
-            <div className="space-y-2 text-sm">
-              {spot.phone && (
-                <p className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  <span>{spot.phone}</span>
-                </p>
-              )}
-              
-              {spot.website && (
-                <p className="flex items-center gap-2">
-                  <Globe className="h-4 w-4" />
-                  <span className="truncate">{spot.website}</span>
-                </p>
-              )}
-              
-              {spot.opening_hours && (
-                <p className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>{spot.opening_hours}</span>
-                </p>
-              )}
-            </div>
-
-            <div className="flex flex-wrap gap-2 text-sm text-gray-500">
-              {spot.parking_available && <span>✓ חניה זמינה</span>}
-              {spot.public_transport && <span>✓ תחבורה ציבורית</span>}
-              {spot.reservation_required && <span>✓ נדרשת הזמנה מראש</span>}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+    <div
+      id={`spot-${spot.id}`}
+      tabIndex={0}
+      className={`
+        bg-white rounded-lg shadow-sm transition-all duration-300
+        ${onClick ? 'cursor-pointer hover:shadow-md' : ''}
+        ${isSelected ? 'ring-2 ring-primary ring-offset-2' : ''}
+        ${compact ? 'p-3' : 'p-4'}
+        focus:outline-none focus:ring-2 focus:ring-primary
+      `}
+      onClick={onClick}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <CategoryIcon className={`${compact ? 'w-4 h-4' : 'w-5 h-5'} text-primary`} />
+          <h3 className={`font-medium ${compact ? 'text-sm' : ''}`}>{spot.name}</h3>
+        </div>
+        {distance && (
+          <span className={`text-muted-foreground ${compact ? 'text-xs' : 'text-sm'}`}>
+            {distance}
+          </span>
+        )}
+      </div>
+      
+      <p className={`text-muted-foreground ${compact ? 'text-xs' : 'text-sm'}`}>{spot.address}</p>
+      
+      <div className={`flex flex-wrap gap-1.5 ${compact ? 'mt-2' : 'mt-3'}`}>
+        {spot.kosher_type && (
+          <span className={`
+            px-2 py-0.5 rounded-full text-white
+            ${compact ? 'text-[10px]' : 'text-xs'}
+            ${spot.kosher_type === 'mehadrin' ? 'bg-emerald-600' : 
+              spot.kosher_type === 'rabbanut' ? 'bg-blue-600' : 
+              'bg-red-600'}
+          `}>
+            {spot.kosher_type === 'mehadrin' ? 'מהדרין' :
+             spot.kosher_type === 'rabbanut' ? 'רבנות' : 'לא כשר'}
+          </span>
+        )}
+        {spot.suitable_for_first_date && !compact && (
+          <span className="text-xs px-2 py-0.5 bg-pink-100 text-pink-800 rounded-full">
+            מתאים לדייט ראשון
+          </span>
+        )}
+        <span className={`px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full ${compact ? 'text-[10px]' : 'text-xs'}`}>
+          {'₪'.repeat(spot.price_range === 'low' ? 1 : spot.price_range === 'medium' ? 2 : 3)}
+        </span>
+      </div>
+    </div>
   );
 }

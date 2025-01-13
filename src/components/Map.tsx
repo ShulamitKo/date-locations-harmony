@@ -101,7 +101,33 @@ function SearchControl() {
   );
 }
 
-export default function Map({ spots, center = [32.0853, 34.7818], zoom = 12, onMapClick, showSearch = false }: MapProps) {
+// Component to preserve map state
+function MapStatePreserver({ spots }: { spots: Spot[] }) {
+  const map = useMap();
+  const isInitialMount = useRef(true);
+  const lastCenter = useRef<L.LatLng | null>(null);
+  const lastZoom = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // שמירת המיקום והזום הנוכחי
+    lastCenter.current = map.getCenter();
+    lastZoom.current = map.getZoom();
+
+    // אם יש ספוטים מסוננים, נשמור על המיקום והזום הנוכחי
+    if (spots.length > 0 && lastCenter.current && lastZoom.current) {
+      map.setView(lastCenter.current, lastZoom.current, { animate: false });
+    }
+  }, [spots, map]);
+
+  return null;
+}
+
+export default function Map({ spots = [], center = [32.0853, 34.7818], zoom = 12, onMapClick, showSearch = false }: MapProps) {
   return (
     <div className="relative w-full h-full">
       <MapContainer
@@ -113,22 +139,25 @@ export default function Map({ spots, center = [32.0853, 34.7818], zoom = 12, onM
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        {spots.map(spot => (
-          <Marker 
-            key={spot.id} 
-            position={[spot.latitude, spot.longitude]}
-          >
-            <Popup>
-              <div dir="rtl">
-                <h3 className="font-bold">{spot.name}</h3>
-                <p className="text-sm text-gray-600">{spot.address}</p>
-                <p className="text-sm">{getCategoryDisplay(spot.category)}</p>
-              </div>
-            </Popup>
-          </Marker>
+        {Array.isArray(spots) && spots.map(spot => (
+          spot && spot.latitude && spot.longitude ? (
+            <Marker 
+              key={spot.id} 
+              position={[spot.latitude, spot.longitude]}
+            >
+              <Popup>
+                <div dir="rtl">
+                  <h3 className="font-bold">{spot.name}</h3>
+                  <p className="text-sm text-gray-600">{spot.address}</p>
+                  <p className="text-sm">{getCategoryDisplay(spot.category)}</p>
+                </div>
+              </Popup>
+            </Marker>
+          ) : null
         ))}
         {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
         {showSearch && <SearchControl />}
+        <MapStatePreserver spots={spots} />
       </MapContainer>
     </div>
   )

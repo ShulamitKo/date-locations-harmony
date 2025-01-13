@@ -8,18 +8,31 @@ export function useSpots() {
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
+    let isMounted = true
+
     const loadSpots = async () => {
       try {
         const spots = await spotsTable.getAll()
-        setSpots(spots)
+        if (isMounted) {
+          setSpots(spots)
+        }
       } catch (error) {
         console.error('Error loading spots:', error)
-        setError(error as Error)
+        if (isMounted) {
+          setError(error as Error)
+        }
       } finally {
-        setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+        }
       }
     }
+    
     loadSpots()
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   return { spots, isLoading, error }
