@@ -15,16 +15,15 @@ type RegionType = 'jerusalem' | 'center' | 'north' | 'south';
 type KosherType = 'mehadrin' | 'rabbanut' | 'none';
 type PriceRangeType = 'low' | 'medium' | 'high';
 
-type FilterArrays = {
+export interface Filters {
+  search: string;
+  kosherTypes: KosherType[];
   categories: CategoryType[];
   regions: RegionType[];
-  kosherTypes: KosherType[];
   priceRanges: PriceRangeType[];
-};
-
-export interface Filters extends FilterArrays {
-  search: string;
   suitableForFirstDate: boolean;
+  parkingAvailable: boolean;
+  publicTransport: boolean;
   radius: number | null;
   sortByDistance: boolean;
 }
@@ -112,12 +111,16 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
                   size="sm"
                   onClick={() => setFilters({
                     ...filters,
+                    search: filters.search,
                     categories: [],
                     regions: [],
                     kosherTypes: [],
                     priceRanges: [],
                     suitableForFirstDate: false,
+                    parkingAvailable: false,
+                    publicTransport: false,
                     radius: null,
+                    sortByDistance: filters.sortByDistance
                   })}
                 >
                   נקה הכל
@@ -137,7 +140,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
                 <Button
                   variant={filters.categories.includes('cafe') ? 'default' : 'outline'}
                   onClick={() => toggleCategoryFilter('cafe')}
-                  className="justify-start"
+                  className="justify-start transition-all duration-200 hover:-translate-x-1"
                 >
                   <Coffee className="h-4 w-4 ml-2" />
                   בית קפה
@@ -145,7 +148,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
                 <Button
                   variant={filters.categories.includes('restaurant') ? 'default' : 'outline'}
                   onClick={() => toggleCategoryFilter('restaurant')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.categories.includes('restaurant') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   <Utensils className="h-4 w-4 ml-2" />
                   מסעדה
@@ -153,7 +156,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
                 <Button
                   variant={filters.categories.includes('bar') ? 'default' : 'outline'}
                   onClick={() => toggleCategoryFilter('bar')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.categories.includes('bar') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   <Beer className="h-4 w-4 ml-2" />
                   בר
@@ -161,7 +164,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
                 <Button
                   variant={filters.categories.includes('activity') ? 'default' : 'outline'}
                   onClick={() => toggleCategoryFilter('activity')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.categories.includes('activity') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   <Sparkles className="h-4 w-4 ml-2" />
                   אטרקציה
@@ -179,28 +182,28 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
                 <Button
                   variant={filters.regions.includes('jerusalem') ? 'default' : 'outline'}
                   onClick={() => toggleRegionFilter('jerusalem')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.regions.includes('jerusalem') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   ירושלים
                 </Button>
                 <Button
                   variant={filters.regions.includes('center') ? 'default' : 'outline'}
                   onClick={() => toggleRegionFilter('center')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.regions.includes('center') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   מרכז
                 </Button>
                 <Button
                   variant={filters.regions.includes('north') ? 'default' : 'outline'}
                   onClick={() => toggleRegionFilter('north')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.regions.includes('north') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   צפון
                 </Button>
                 <Button
                   variant={filters.regions.includes('south') ? 'default' : 'outline'}
                   onClick={() => toggleRegionFilter('south')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.regions.includes('south') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   דרום
                 </Button>
@@ -217,21 +220,21 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
                 <Button
                   variant={filters.priceRanges.includes('low') ? 'default' : 'outline'}
                   onClick={() => togglePriceRangeFilter('low')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.priceRanges.includes('low') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   ₪ זול
                 </Button>
                 <Button
                   variant={filters.priceRanges.includes('medium') ? 'default' : 'outline'}
                   onClick={() => togglePriceRangeFilter('medium')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.priceRanges.includes('medium') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   ₪₪ בינוני
                 </Button>
                 <Button
                   variant={filters.priceRanges.includes('high') ? 'default' : 'outline'}
                   onClick={() => togglePriceRangeFilter('high')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.priceRanges.includes('high') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   ₪₪₪ יקר
                 </Button>
@@ -248,21 +251,21 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
                 <Button
                   variant={filters.kosherTypes.includes('mehadrin') ? 'default' : 'outline'}
                   onClick={() => toggleKosherTypeFilter('mehadrin')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('mehadrin') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   מהדרין
                 </Button>
                 <Button
                   variant={filters.kosherTypes.includes('rabbanut') ? 'default' : 'outline'}
                   onClick={() => toggleKosherTypeFilter('rabbanut')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('rabbanut') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   רבנות
                 </Button>
                 <Button
                   variant={filters.kosherTypes.includes('none') ? 'default' : 'outline'}
                   onClick={() => toggleKosherTypeFilter('none')}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('none') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   לא כשר
                 </Button>
@@ -279,7 +282,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
                 <Button
                   variant={filters.suitableForFirstDate ? 'default' : 'outline'}
                   onClick={() => updateFilters('suitableForFirstDate', !filters.suitableForFirstDate)}
-                  className="justify-start"
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.suitableForFirstDate ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   מתאים לדייט ראשון
                 </Button>

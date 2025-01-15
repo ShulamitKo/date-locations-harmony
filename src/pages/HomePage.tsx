@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Coffee, Utensils, Beer, Sparkles, MoreHorizontal, ArrowUpDown, MapPin, List, Map, X, ScrollText, FileText } from "lucide-react";
+import { Plus, Coffee, Utensils, Beer, Sparkles, MoreHorizontal, ArrowUpDown, MapPin, List, Map, X, ScrollText, FileText, RotateCcw } from "lucide-react";
 import type { Spot } from "@/lib/supabase/types";
 import { spotsTable } from "@/lib/supabase/config";
 import SpotCard from "@/components/SpotCard";
@@ -79,12 +79,14 @@ interface Filters {
   kosherTypes: KosherType[];
   priceRanges: PriceRangeType[];
   suitableForFirstDate: boolean;
+  parkingAvailable: boolean;
+  publicTransport: boolean;
   radius: number | null;
   sortByDistance: boolean;
 }
 
 // Component to handle map bounds
-function MapBoundsHandler({ spots }: { spots: Spot[] }) {
+function MapBoundsHandler({ spots, resetMap }: { spots: Spot[], resetMap: boolean }) {
   const map = useMap();
 
   useEffect(() => {
@@ -92,7 +94,7 @@ function MapBoundsHandler({ spots }: { spots: Spot[] }) {
 
     const bounds = L.latLngBounds(spots.map(spot => [spot.latitude, spot.longitude]));
     map.fitBounds(bounds, { padding: [50, 50] });
-  }, [spots, map]);
+  }, [spots, map, resetMap]);
 
   return null;
 }
@@ -112,11 +114,14 @@ export default function HomePage() {
     kosherTypes: [],
     priceRanges: [],
     suitableForFirstDate: false,
+    parkingAvailable: false,
+    publicTransport: false,
     radius: null,
     sortByDistance: false
   });
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [resetMap, setResetMap] = useState(false);
 
   useEffect(() => {
     const loadSpots = async () => {
@@ -265,11 +270,19 @@ export default function HomePage() {
     }
   }, [selectedSpot, spots]);
 
+  const handleReset = () => {
+    setResetMap(prev => !prev);
+    setSelectedSpot(null);
+    if (mapRef.current) {
+      mapRef.current.closePopup();
+    }
+  };
+
   if (isLoading) return <div className="container mx-auto py-8 text-center">טוען...</div>;
   if (error) return <div className="container mx-auto py-8 text-center text-red-500">שגיאה בטעינת המקומות</div>;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative min-h-screen pb-16">
       <div className="container mx-auto px-4 py-8">
         <div className="h-screen flex flex-col">
           {/* Hero Section */}
@@ -336,6 +349,15 @@ export default function HomePage() {
                     onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                     className="w-full sm:w-[300px]"
                   />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full hover:bg-primary hover:text-white transition-colors"
+                    onClick={handleReset}
+                    title="רענן חיפוש"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="outline" 
                     onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
@@ -577,7 +599,7 @@ export default function HomePage() {
                     tileSize={256}
                     keepBuffer={2}
                   />
-                  <MapBoundsHandler spots={filteredSpots} />
+                  <MapBoundsHandler spots={filteredSpots} resetMap={resetMap} />
                   {filteredSpots.map(spot => {
                     const isSelected = selectedSpot === spot.id;
                     return (
@@ -586,7 +608,10 @@ export default function HomePage() {
                         position={[spot.latitude, spot.longitude]}
                         icon={categoryIcons[spot.category]}
                         eventHandlers={{
-                          click: () => handleSpotClick(spot)
+                          click: () => handleSpotClick(spot),
+                          mouseover: (e) => {
+                            e.target.openPopup();
+                          }
                         }}
                         opacity={isSelected ? 1 : 0.7}
                         zIndexOffset={isSelected ? 1000 : 0}

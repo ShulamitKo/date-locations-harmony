@@ -15,6 +15,7 @@ import { spotsTable, reviewsTable } from "@/lib/supabase/config";
 import { getCategoryDisplay, getKosherTypeDisplay, getNoiseLevelDisplay, getRegionDisplay, getPriceRangeDisplay } from "@/lib/utils";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import Map from '@/components/Map'
 
 interface ReviewForm {
   reviewer_name: string;
@@ -388,6 +389,33 @@ export default function SpotDetails() {
                     onChange={(e) => setEditedSpot(prev => prev ? { ...prev, notes: e.target.value } : null)}
                     className="h-32"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="location">מיקום</Label>
+                  <div className="h-64 rounded-lg overflow-hidden">
+                    <Map
+                      spots={[{
+                        ...editedSpot!,
+                        name: 'המיקום החדש שנבחר'
+                      }]}
+                      center={[editedSpot?.latitude || 32.0853, editedSpot?.longitude || 34.7818]}
+                      zoom={15}
+                      onMapClick={(event) => {
+                        setEditedSpot(prev => prev ? {
+                          ...prev,
+                          latitude: event.lngLat.lat,
+                          longitude: event.lngLat.lng
+                        } : null);
+                        toast({
+                          title: "המיקום עודכן",
+                          description: "לחץ על שמירה כדי לשמור את השינויים",
+                        });
+                      }}
+                      showSearch={true}
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500">לחץ על המפה כדי לבחור מיקום חדש, או השתמש בחיפוש למעלה</p>
                 </div>
               </>
             ) : (

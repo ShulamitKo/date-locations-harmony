@@ -1,21 +1,22 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { Filters } from '@/components/FilterBar';
 import { FilterBar } from '@/components/FilterBar';
 import SpotCard from '@/components/SpotCard';
 import { useSpots } from '@/hooks/useSpots';
 
 export default function Index() {
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Filters>({
-    kosherTypes: [],
+    search: "",
     categories: [],
     regions: [],
+    kosherTypes: [],
     priceRanges: [],
     suitableForFirstDate: false,
     parkingAvailable: false,
     publicTransport: false,
+    radius: null,
+    sortByDistance: false
   });
 
   const { spots, isLoading, error } = useSpots();
@@ -82,7 +83,7 @@ export default function Index() {
           dir="rtl"
         />
       </div>
-      <FilterBar filters={filters} onChange={setFilters} />
+      <FilterBar filters={filters} setFilters={setFilters} />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
         {filteredSpots.map((spot) => (
           <SpotCard key={spot.id} spot={spot} />

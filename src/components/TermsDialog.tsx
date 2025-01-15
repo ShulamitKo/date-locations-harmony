@@ -47,16 +47,16 @@ export function TermsDialog({ trigger }: TermsDialogProps) {
         </DialogHeader>
         <div className="space-y-6 sm:space-y-8 text-right px-2">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-primary">ברוכים הבאים ל-SpotDate!</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-primary">ברוכים הבאים ל-DateSpots!</h2>
             <p className="text-base sm:text-lg leading-relaxed text-muted-foreground">
-              אנחנו שמחים שבחרתם להצטרף לקהילת SpotDate. האתר נוצר במטרה לעזור לכולנו למצוא מקומות מתאימים לדייטים, והוא מבוסס על שיתוף מידע קהילתי.
+              אנחנו שמחים שבחרתם להצטרף לקהילת DateSpots. האתר נוצר במטרה לעזור לכולנו למצוא מקומות מתאימים לדייטים, והוא מבוסס על שיתוף מידע קהילתי.
             </p>
           </div>
 
           <div className="bg-primary/5 p-6 rounded-lg">
             <h3 className="text-xl font-semibold mb-3 text-primary">על האתר והשימוש בו</h3>
             <div className="space-y-2 text-muted-foreground">
-              <p>SpotDate הוא פלטפורמה קהילתית לשיתוף המלצות על מקומות לדייטים</p>
+              <p>DateSpots הוא פלטפורמה קהילתית לשיתוף המלצות על מקומות לדייטים</p>
               <p>השימוש באתר הוא חופשי וללא עלות</p>
               <p>המידע באתר מבוסס על המלצות משתמשים</p>
               <p>אין צורך בהרשמה או במסירת פרטים אישיים</p>

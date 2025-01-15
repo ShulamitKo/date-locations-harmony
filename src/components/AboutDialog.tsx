@@ -39,7 +39,7 @@ export function AboutDialog({ trigger }: AboutDialogProps) {
       <DialogContent className="max-w-[90vw] md:max-w-[800px] overflow-y-auto max-h-[90vh] bg-background">
         <DialogHeader className="border-b pb-4 mb-6">
           <DialogTitle className="text-3xl font-bold text-center bg-gradient-to-r from-primary/90 to-primary bg-clip-text text-transparent">
-            ברוכים הבאים ל-SpotDate! 👋
+            ברוכים הבאים ל-DateSpots! 👋
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-8 text-right px-2">
