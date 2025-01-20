@@ -85,19 +85,22 @@
   animation: highlight 1s ease-in-out;
 }
 
+/* Desktop Spot Details Styles */
+@media (min-width: 769px) {
+  .spot-details-container {
+    min-height: 100vh;
+  }
+
+  .spot-details-content {
+    padding: 0;
+  }
+}
+
 /* Map Mobile Styles */
 @media (max-width: 768px) {
   .leaflet-container {
     touch-action: none;
-    height: 100% !important;
-    width: 100% !important;
     -webkit-tap-highlight-color: transparent;
-    position: absolute !important;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1;
   }
 
   .leaflet-touch .leaflet-control-zoom {
@@ -152,5 +155,19 @@
   .leaflet-touch .leaflet-bar {
     border: none;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  .spot-details-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 4rem);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .spot-details-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

@@ -161,437 +161,443 @@ export default function SpotDetails() {
   if (!spot) return null;
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold">{spot.name}</h1>
-        <div className="flex gap-2">
-          {isEditing ? (
-            <>
-              <Button onClick={() => setIsEditing(false)} variant="outline">
-                ביטול
-              </Button>
-              <Button onClick={handleSave}>
-                שמירה
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" onClick={() => navigate('/')}>
-                <ArrowRight className="h-4 w-4 ml-2" />
-                חזרה לדף הבית
-              </Button>
-              <Button onClick={() => setIsEditing(true)} variant="outline">
-                <Pencil className="h-4 w-4 ml-2" />
-                עריכה
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="p-4">
-          <div className="space-y-4">
+    <div className="spot-details-container">
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold">{spot.name}</h1>
+          <div className="flex gap-2">
             {isEditing ? (
               <>
-                <div className="space-y-2">
-                  <Label htmlFor="name">שם המקום</Label>
-                  <Input
-                    id="name"
-                    value={editedSpot?.name}
-                    onChange={(e) => setEditedSpot(prev => prev ? { ...prev, name: e.target.value } : null)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address">כתובת</Label>
-                  <Input
-                    id="address"
-                    value={editedSpot?.address}
-                    onChange={(e) => setEditedSpot(prev => prev ? { ...prev, address: e.target.value } : null)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">טלפון</Label>
-                  <Input
-                    id="phone"
-                    value={editedSpot?.phone || ''}
-                    onChange={(e) => setEditedSpot(prev => prev ? { ...prev, phone: e.target.value } : null)}
-                    dir="ltr"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="website">אתר אינטרנט</Label>
-                  <Input
-                    id="website"
-                    value={editedSpot?.website || ''}
-                    onChange={(e) => setEditedSpot(prev => prev ? { ...prev, website: e.target.value } : null)}
-                    dir="ltr"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="category">קטגוריה</Label>
-                  <Select
-                    value={editedSpot?.category}
-                    onValueChange={(value: "cafe" | "restaurant" | "bar" | "activity" | "other") => 
-                      setEditedSpot(prev => prev ? { ...prev, category: value } : null)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="בחר קטגוריה" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cafe">בית קפה</SelectItem>
-                      <SelectItem value="restaurant">מסעדה</SelectItem>
-                      <SelectItem value="bar">בר</SelectItem>
-                      <SelectItem value="activity">אטרקציה</SelectItem>
-                      <SelectItem value="other">אחר</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="kosher_type">כשרות</Label>
-                  <Select
-                    value={editedSpot?.kosher_type}
-                    onValueChange={(value: "mehadrin" | "rabbanut" | "none") => 
-                      setEditedSpot(prev => prev ? { ...prev, kosher_type: value } : null)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="בחר כשרות" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="mehadrin">מהדרין</SelectItem>
-                      <SelectItem value="rabbanut">רבנות</SelectItem>
-                      <SelectItem value="none">לא כשר</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="noise_level">רמת רעש</Label>
-                  <Select
-                    value={editedSpot?.noise_level}
-                    onValueChange={(value: "quiet" | "moderate" | "loud") => 
-                      setEditedSpot(prev => prev ? { ...prev, noise_level: value } : null)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="בחר רמת רעש" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="quiet">שקט</SelectItem>
-                      <SelectItem value="moderate">בינוני</SelectItem>
-                      <SelectItem value="loud">רועש</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="region">אזור</Label>
-                  <Select
-                    value={editedSpot?.region}
-                    onValueChange={(value: "north" | "center" | "south" | "jerusalem") => 
-                      setEditedSpot(prev => prev ? { ...prev, region: value } : null)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="בחר אזור" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="jerusalem">ירושלים</SelectItem>
-                      <SelectItem value="center">מרכז</SelectItem>
-                      <SelectItem value="north">צפון</SelectItem>
-                      <SelectItem value="south">דרום</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="price_range">טווח מחירים</Label>
-                  <Select
-                    value={editedSpot?.price_range}
-                    onValueChange={(value: "low" | "medium" | "high") => 
-                      setEditedSpot(prev => prev ? { ...prev, price_range: value } : null)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="בחר טווח מחירים" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">₪ זול</SelectItem>
-                      <SelectItem value="medium">₪₪ בינוני</SelectItem>
-                      <SelectItem value="high">₪₪₪ יקר</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="opening_hours">שעות פתיחה</Label>
-                  <Input
-                    id="opening_hours"
-                    value={editedSpot?.opening_hours || ''}
-                    onChange={(e) => setEditedSpot(prev => prev ? { ...prev, opening_hours: e.target.value } : null)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="recommended_time">זמן מומלץ</Label>
-                  <Input
-                    id="recommended_time"
-                    value={editedSpot?.recommended_time || ''}
-                    onChange={(e) => setEditedSpot(prev => prev ? { ...prev, recommended_time: e.target.value } : null)}
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="suitable_for_first_date"
-                      checked={editedSpot?.suitable_for_first_date}
-                      onCheckedChange={(checked) => setEditedSpot(prev => prev ? { ...prev, suitable_for_first_date: checked as boolean } : null)}
-                    />
-                    <Label htmlFor="suitable_for_first_date">מתאים לדייט ראשון</Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="parking_available"
-                      checked={editedSpot?.parking_available}
-                      onCheckedChange={(checked) => setEditedSpot(prev => prev ? { ...prev, parking_available: checked as boolean } : null)}
-                    />
-                    <Label htmlFor="parking_available">חניה זמינה</Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="public_transport"
-                      checked={editedSpot?.public_transport}
-                      onCheckedChange={(checked) => setEditedSpot(prev => prev ? { ...prev, public_transport: checked as boolean } : null)}
-                    />
-                    <Label htmlFor="public_transport">תחבורה ציבורית</Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="reservation_required"
-                      checked={editedSpot?.reservation_required}
-                      onCheckedChange={(checked) => setEditedSpot(prev => prev ? { ...prev, reservation_required: checked as boolean } : null)}
-                    />
-                    <Label htmlFor="reservation_required">נדרשת הזמנה מראש</Label>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="notes">הערות</Label>
-                  <Textarea
-                    id="notes"
-                    value={editedSpot?.notes || ''}
-                    onChange={(e) => setEditedSpot(prev => prev ? { ...prev, notes: e.target.value } : null)}
-                    className="h-32"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="location">מיקום</Label>
-                  <div className="h-64 rounded-lg overflow-hidden">
-                    <Map
-                      spots={[{
-                        ...editedSpot!,
-                        name: 'המיקום החדש שנבחר'
-                      }]}
-                      center={[editedSpot?.latitude || 32.0853, editedSpot?.longitude || 34.7818]}
-                      zoom={15}
-                      onMapClick={(event) => {
-                        setEditedSpot(prev => prev ? {
-                          ...prev,
-                          latitude: event.lngLat.lat,
-                          longitude: event.lngLat.lng
-                        } : null);
-                        toast({
-                          title: "המיקום עודכן",
-                          description: "לחץ על שמירה כדי לשמור את השינויים",
-                        });
-                      }}
-                      showSearch={true}
-                    />
-                  </div>
-                  <p className="text-sm text-gray-500">לחץ על המפה כדי לבחור מיקום חדש, או השתמש בחיפוש למעלה</p>
-                </div>
+                <Button onClick={() => setIsEditing(false)} variant="outline" size="sm">
+                  ביטול
+                </Button>
+                <Button onClick={handleSave} size="sm">
+                  שמירה
+                </Button>
               </>
             ) : (
               <>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">{getCategoryDisplay(spot.category)}</Badge>
-                  <Badge variant="outline">
-                    {getKosherTypeDisplay(spot.kosher_type)}
-                  </Badge>
-                  <Badge variant="outline">
-                    {getPriceRangeDisplay(spot.price_range)}
-                  </Badge>
-                  <Badge>{getRegionDisplay(spot.region)}</Badge>
-                  {spot.suitable_for_first_date && (
-                    <Badge variant="outline" className="bg-green-50">
-                      מתאים לדייט ראשון
-                    </Badge>
-                  )}
-                  <Badge variant="outline">
-                    רמת רעש: {getNoiseLevelDisplay(spot.noise_level)}
-                  </Badge>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    <span className="text-gray-600">{spot.address}</span>
-                  </p>
-                  
-                  {spot.phone && (
-                    <p className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      <a href={`tel:${spot.phone}`} className="text-blue-600 hover:underline">
-                        {spot.phone}
-                      </a>
-                    </p>
-                  )}
-                  
-                  {spot.website && (
-                    <p className="flex items-center gap-2">
-                      <Globe className="h-4 w-4" />
-                      <a href={spot.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                        {spot.website}
-                      </a>
-                    </p>
-                  )}
-                  
-                  {spot.opening_hours && (
-                    <p className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      {spot.opening_hours}
-                    </p>
-                  )}
-                  
-                  {spot.recommended_time && (
-                    <p className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      זמן מומלץ: {spot.recommended_time}
-                    </p>
-                  )}
-                </div>
-
-                {spot.latitude && spot.longitude && (
-                  <div className="h-64 mt-4 rounded-lg overflow-hidden">
-                    <MapContainer
-                      center={[spot.latitude, spot.longitude]}
-                      zoom={15}
-                      style={{ height: "100%", width: "100%" }}
-                    >
-                      <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                      />
-                      <Marker position={[spot.latitude, spot.longitude]}>
-                        <Popup>{spot.name}</Popup>
-                      </Marker>
-                    </MapContainer>
-                  </div>
-                )}
-
-                <div className="flex flex-wrap gap-2 text-sm text-gray-500">
-                  {spot.parking_available && <span>✓ חניה זמינה</span>}
-                  {spot.public_transport && <span>✓ תחבורה ציבורית</span>}
-                  {spot.reservation_required && <span>✓ נדרשת הזמנה מראש</span>}
-                </div>
-
-                {spot.notes && (
-                  <div className="mt-4">
-                    <h3 className="font-semibold mb-2">הערות נוספות</h3>
-                    <p className="text-gray-600">{spot.notes}</p>
-                  </div>
-                )}
+                <Button variant="ghost" onClick={() => navigate('/')} size="sm">
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                  חזרה
+                </Button>
+                <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
+                  <Pencil className="h-4 w-4 ml-2" />
+                  עריכה
+                </Button>
               </>
             )}
           </div>
-        </Card>
+        </div>
 
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">ביקורות</h2>
-            {reviews.length === 0 ? (
-              <p className="text-gray-500">עדיין אין ביקורות למקום זה</p>
-            ) : (
+        <div className="spot-details-content">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="p-4">
               <div className="space-y-4">
-                {reviews.map((review) => (
-                  <Card key={review.id} className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-semibold">{review.reviewer_name}</p>
-                        <p className="text-gray-500 text-sm">
-                          {review.created_at && new Date(review.created_at).toLocaleDateString('he-IL')}
-                          {review.visit_date && ` • ביקר/ה ב-${new Date(review.visit_date).toLocaleDateString('he-IL')}`}
-                        </p>
+                {isEditing ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="name">שם המקום</Label>
+                      <Input
+                        id="name"
+                        value={editedSpot?.name}
+                        onChange={(e) => setEditedSpot(prev => prev ? { ...prev, name: e.target.value } : null)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="address">כתובת</Label>
+                      <Input
+                        id="address"
+                        value={editedSpot?.address}
+                        onChange={(e) => setEditedSpot(prev => prev ? { ...prev, address: e.target.value } : null)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">טלפון</Label>
+                      <Input
+                        id="phone"
+                        value={editedSpot?.phone || ''}
+                        onChange={(e) => setEditedSpot(prev => prev ? { ...prev, phone: e.target.value } : null)}
+                        dir="ltr"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="website">אתר אינטרנט</Label>
+                      <Input
+                        id="website"
+                        value={editedSpot?.website || ''}
+                        onChange={(e) => setEditedSpot(prev => prev ? { ...prev, website: e.target.value } : null)}
+                        dir="ltr"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="category">קטגוריה</Label>
+                      <Select
+                        value={editedSpot?.category}
+                        onValueChange={(value: "cafe" | "restaurant" | "bar" | "activity" | "other") => 
+                          setEditedSpot(prev => prev ? { ...prev, category: value } : null)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="בחר קטגוריה" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cafe">בית קפה</SelectItem>
+                          <SelectItem value="restaurant">מסעדה</SelectItem>
+                          <SelectItem value="bar">בר</SelectItem>
+                          <SelectItem value="activity">אטרקציה</SelectItem>
+                          <SelectItem value="other">אחר</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="kosher_type">כשרות</Label>
+                      <Select
+                        value={editedSpot?.kosher_type}
+                        onValueChange={(value: "mehadrin" | "rabbanut" | "none") => 
+                          setEditedSpot(prev => prev ? { ...prev, kosher_type: value } : null)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="בחר כשרות" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="mehadrin">מהדרין</SelectItem>
+                          <SelectItem value="rabbanut">רבנות</SelectItem>
+                          <SelectItem value="none">לא כשר</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="noise_level">רמת רעש</Label>
+                      <Select
+                        value={editedSpot?.noise_level}
+                        onValueChange={(value: "quiet" | "moderate" | "loud") => 
+                          setEditedSpot(prev => prev ? { ...prev, noise_level: value } : null)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="בחר רמת רעש" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="quiet">שקט</SelectItem>
+                          <SelectItem value="moderate">בינוני</SelectItem>
+                          <SelectItem value="loud">רועש</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="region">אזור</Label>
+                      <Select
+                        value={editedSpot?.region}
+                        onValueChange={(value: "north" | "center" | "south" | "jerusalem") => 
+                          setEditedSpot(prev => prev ? { ...prev, region: value } : null)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="בחר אזור" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="jerusalem">ירושלים</SelectItem>
+                          <SelectItem value="center">מרכז</SelectItem>
+                          <SelectItem value="north">צפון</SelectItem>
+                          <SelectItem value="south">דרום</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="price_range">טווח מחירים</Label>
+                      <Select
+                        value={editedSpot?.price_range}
+                        onValueChange={(value: "low" | "medium" | "high") => 
+                          setEditedSpot(prev => prev ? { ...prev, price_range: value } : null)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="בחר טווח מחירים" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">₪ זול</SelectItem>
+                          <SelectItem value="medium">₪₪ בינוני</SelectItem>
+                          <SelectItem value="high">₪₪₪ יקר</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="opening_hours">שעות פתיחה</Label>
+                      <Input
+                        id="opening_hours"
+                        value={editedSpot?.opening_hours || ''}
+                        onChange={(e) => setEditedSpot(prev => prev ? { ...prev, opening_hours: e.target.value } : null)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="recommended_time">זמן מומלץ</Label>
+                      <Input
+                        id="recommended_time"
+                        value={editedSpot?.recommended_time || ''}
+                        onChange={(e) => setEditedSpot(prev => prev ? { ...prev, recommended_time: e.target.value } : null)}
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="suitable_for_first_date"
+                          checked={editedSpot?.suitable_for_first_date}
+                          onCheckedChange={(checked) => setEditedSpot(prev => prev ? { ...prev, suitable_for_first_date: checked as boolean } : null)}
+                        />
+                        <Label htmlFor="suitable_for_first_date">מתאים לדייט ראשון</Label>
                       </div>
-                      <Badge variant="outline" className="text-lg text-yellow-500 bg-yellow-50">
-                        {Array.from({ length: review.rating }).map((_, i) => "⭐").join("")}
+
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="parking_available"
+                          checked={editedSpot?.parking_available}
+                          onCheckedChange={(checked) => setEditedSpot(prev => prev ? { ...prev, parking_available: checked as boolean } : null)}
+                        />
+                        <Label htmlFor="parking_available">חניה זמינה</Label>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="public_transport"
+                          checked={editedSpot?.public_transport}
+                          onCheckedChange={(checked) => setEditedSpot(prev => prev ? { ...prev, public_transport: checked as boolean } : null)}
+                        />
+                        <Label htmlFor="public_transport">תחבורה ציבורית</Label>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="reservation_required"
+                          checked={editedSpot?.reservation_required}
+                          onCheckedChange={(checked) => setEditedSpot(prev => prev ? { ...prev, reservation_required: checked as boolean } : null)}
+                        />
+                        <Label htmlFor="reservation_required">נדרשת הזמנה מראש</Label>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="notes">הערות</Label>
+                      <Textarea
+                        id="notes"
+                        value={editedSpot?.notes || ''}
+                        onChange={(e) => setEditedSpot(prev => prev ? { ...prev, notes: e.target.value } : null)}
+                        className="h-32"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="location">מיקום</Label>
+                      <div className="h-64 rounded-lg overflow-hidden">
+                        <Map
+                          spots={[{
+                            ...editedSpot!,
+                            name: 'המיקום החדש שנבחר'
+                          }]}
+                          center={[editedSpot?.latitude || 32.0853, editedSpot?.longitude || 34.7818]}
+                          zoom={15}
+                          onMapClick={(event) => {
+                            setEditedSpot(prev => prev ? {
+                              ...prev,
+                              latitude: event.lngLat.lat,
+                              longitude: event.lngLat.lng
+                            } : null);
+                            toast({
+                              title: "המיקום עודכן",
+                              description: "לחץ על שמירה כדי לשמור את השינויים",
+                            });
+                          }}
+                          showSearch={true}
+                        />
+                      </div>
+                      <p className="text-sm text-gray-500">לחץ על המפה כדי לבחור מיקום חדש, או השתמש בחיפוש למעלה</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline">{getCategoryDisplay(spot.category)}</Badge>
+                      <Badge variant="outline">
+                        {getKosherTypeDisplay(spot.kosher_type)}
+                      </Badge>
+                      <Badge variant="outline">
+                        {getPriceRangeDisplay(spot.price_range)}
+                      </Badge>
+                      <Badge>{getRegionDisplay(spot.region)}</Badge>
+                      {spot.suitable_for_first_date && (
+                        <Badge variant="outline" className="bg-green-50">
+                          מתאים לדייט ראשון
+                        </Badge>
+                      )}
+                      <Badge variant="outline">
+                        רמת רעש: {getNoiseLevelDisplay(spot.noise_level)}
                       </Badge>
                     </div>
-                    <p className="mt-2">{review.content}</p>
-                  </Card>
-                ))}
+
+                    <div className="space-y-2">
+                      <p className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        <span className="text-gray-600">{spot.address}</span>
+                      </p>
+                      
+                      {spot.phone && (
+                        <p className="flex items-center gap-2">
+                          <Phone className="h-4 w-4" />
+                          <a href={`tel:${spot.phone}`} className="text-blue-600 hover:underline">
+                            {spot.phone}
+                          </a>
+                        </p>
+                      )}
+                      
+                      {spot.website && (
+                        <p className="flex items-center gap-2">
+                          <Globe className="h-4 w-4" />
+                          <a href={spot.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                            {spot.website}
+                          </a>
+                        </p>
+                      )}
+                      
+                      {spot.opening_hours && (
+                        <p className="flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          {spot.opening_hours}
+                        </p>
+                      )}
+                      
+                      {spot.recommended_time && (
+                        <p className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          זמן מומלץ: {spot.recommended_time}
+                        </p>
+                      )}
+                    </div>
+
+                    {spot.latitude && spot.longitude && (
+                      <div className="h-64 sm:h-80 mt-4 rounded-lg overflow-hidden">
+                        <MapContainer
+                          center={[spot.latitude, spot.longitude]}
+                          zoom={15}
+                          style={{ height: "100%", width: "100%" }}
+                          className="z-0"
+                          scrollWheelZoom={true}
+                        >
+                          <TileLayer
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                          />
+                          <Marker position={[spot.latitude, spot.longitude]}>
+                            <Popup>{spot.name}</Popup>
+                          </Marker>
+                        </MapContainer>
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+                      {spot.parking_available && <span>✓ חניה זמינה</span>}
+                      {spot.public_transport && <span>✓ תחבורה ציבורית</span>}
+                      {spot.reservation_required && <span>✓ נדרשת הזמנה מראש</span>}
+                    </div>
+
+                    {spot.notes && (
+                      <div className="mt-4">
+                        <h3 className="font-semibold mb-2">הערות נוספות</h3>
+                        <p className="text-gray-600">{spot.notes}</p>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-            )}
+            </Card>
+
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-2xl font-semibold mb-4">ביקורות</h2>
+                {reviews.length === 0 ? (
+                  <p className="text-gray-500">עדיין אין ביקורות למקום זה</p>
+                ) : (
+                  <div className="space-y-4">
+                    {reviews.map((review) => (
+                      <Card key={review.id} className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-semibold">{review.reviewer_name}</p>
+                            <p className="text-gray-500 text-sm">
+                              {review.created_at && new Date(review.created_at).toLocaleDateString('he-IL')}
+                              {review.visit_date && ` • ביקר/ה ב-${new Date(review.visit_date).toLocaleDateString('he-IL')}`}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="text-lg text-yellow-500 bg-yellow-50">
+                            {Array.from({ length: review.rating }).map((_, i) => "⭐").join("")}
+                          </Badge>
+                        </div>
+                        <p className="mt-2">{review.content}</p>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Card className="p-4">
+                <h2 className="text-xl font-semibold mb-4">הוספת ביקורת</h2>
+                <form onSubmit={handleSubmitReview} className="space-y-4">
+                  <div>
+                    <Label htmlFor="reviewer_name">שם</Label>
+                    <Input
+                      id="reviewer_name"
+                      value={reviewForm.reviewer_name}
+                      onChange={(e) => setReviewForm({ ...reviewForm, reviewer_name: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="rating">דירוג</Label>
+                    <Input
+                      id="rating"
+                      type="number"
+                      min="1"
+                      max="5"
+                      value={reviewForm.rating}
+                      onChange={(e) => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="content">תוכן הביקורת</Label>
+                    <Textarea
+                      id="content"
+                      value={reviewForm.content}
+                      onChange={(e) => setReviewForm({ ...reviewForm, content: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="visit_date">תאריך הביקור</Label>
+                    <Input
+                      id="visit_date"
+                      type="date"
+                      value={reviewForm.visit_date}
+                      onChange={(e) => setReviewForm({ ...reviewForm, visit_date: e.target.value })}
+                    />
+                  </div>
+
+                  <Button type="submit" className="w-full">
+                    שליחת ביקורת
+                  </Button>
+                </form>
+              </Card>
+            </div>
           </div>
-
-          <Card className="p-4">
-            <h2 className="text-xl font-semibold mb-4">הוספת ביקורת</h2>
-            <form onSubmit={handleSubmitReview} className="space-y-4">
-              <div>
-                <Label htmlFor="reviewer_name">שם</Label>
-                <Input
-                  id="reviewer_name"
-                  value={reviewForm.reviewer_name}
-                  onChange={(e) => setReviewForm({ ...reviewForm, reviewer_name: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="rating">דירוג</Label>
-                <Input
-                  id="rating"
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={reviewForm.rating}
-                  onChange={(e) => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="content">תוכן הביקורת</Label>
-                <Textarea
-                  id="content"
-                  value={reviewForm.content}
-                  onChange={(e) => setReviewForm({ ...reviewForm, content: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="visit_date">תאריך הביקור</Label>
-                <Input
-                  id="visit_date"
-                  type="date"
-                  value={reviewForm.visit_date}
-                  onChange={(e) => setReviewForm({ ...reviewForm, visit_date: e.target.value })}
-                />
-              </div>
-
-              <Button type="submit" className="w-full">
-                שליחת ביקורת
-              </Button>
-            </form>
-          </Card>
         </div>
       </div>
     </div>
