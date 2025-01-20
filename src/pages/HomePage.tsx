@@ -156,8 +156,19 @@ export default function HomePage() {
 
   // הוספת מעקב אחר שינויי גודל מסך
   useEffect(() => {
+    let lastWidth = window.innerWidth;
     const handleResize = () => {
-      setViewMode(window.innerWidth <= 768 ? 'map' : 'list');
+      const currentWidth = window.innerWidth;
+      // בדיקה האם המעבר הוא בין מובייל לדסקטופ או להיפך
+      const wasMobile = lastWidth <= 768;
+      const isMobile = currentWidth <= 768;
+      
+      // עדכון התצוגה רק אם יש מעבר בין מובייל לדסקטופ
+      if (wasMobile !== isMobile) {
+        setViewMode(isMobile ? 'map' : 'list');
+      }
+      
+      lastWidth = currentWidth;
     };
 
     window.addEventListener('resize', handleResize);
@@ -376,15 +387,6 @@ export default function HomePage() {
                       onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                       className="w-full border-0 bg-transparent focus-visible:ring-0 px-0 placeholder:text-gray-400 text-sm h-7"
                     />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full hover:bg-gray-200/80 transition-colors h-6 w-6 sm:h-7 sm:w-7"
-                      onClick={handleReset}
-                      title="רענן חיפוש"
-                    >
-                      <RotateCcw className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-500" />
-                    </Button>
                   </div>
 
                   <div className="sm:hidden flex bg-gray-50/80 backdrop-blur-sm p-0.5 rounded-full shadow-inner">
@@ -564,12 +566,12 @@ export default function HomePage() {
           <div className="flex-1 flex flex-col sm:flex-row overflow-hidden relative">
             {/* List View */}
             <div className={`
-              ${viewMode === 'map' ? 'fixed bottom-0 left-0 right-0 z-50 h-32 bg-transparent backdrop-blur-md' : 'h-full overflow-y-auto'}
+              ${viewMode === 'map' ? 'fixed bottom-0 left-0 right-0 z-[1000] h-32 bg-transparent backdrop-blur-none' : 'h-full overflow-y-auto'}
               ${viewMode === 'list' ? 'block' : viewMode === 'map' ? 'block' : 'hidden'}
               sm:relative sm:block sm:max-w-[400px] sm:border-l sm:h-auto sm:shadow-none sm:bg-white sm:backdrop-blur-none
             `}>
               <div className={`
-                ${viewMode === 'map' ? 'h-full overflow-x-auto overflow-y-hidden scrollbar-hide' : ''}
+                ${viewMode === 'map' ? 'h-full overflow-x-auto overflow-y-hidden' : ''}
                 ${viewMode === 'map' ? 'px-4' : 'container mx-auto p-4'}
               `}>
                 <div className={`
@@ -609,9 +611,21 @@ export default function HomePage() {
             {/* Map View */}
             <div className={`
               flex-1 relative
-              ${viewMode === 'list' ? 'hidden' : 'block h-[calc(100vh-8rem)]'}
+              ${viewMode === 'list' ? 'hidden' : 'block h-[calc(100vh-8rem-8rem)]'}
               sm:block sm:h-auto
             `}>
+                {/* Refresh Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="absolute top-2 right-2 z-[999] bg-white/90 hover:bg-white shadow-md rounded-full px-3 py-1 text-xs flex items-center gap-1.5"
+                  onClick={handleReset}
+                  title="רענן מפה בהתאם לחיפוש"
+                >
+                  <RotateCcw className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-500" />
+                  <span>רענן מפה</span>
+                </Button>
+
                 <MapContainer
                   ref={mapRef}
                   center={[31.7683, 35.2137]}

@@ -101,6 +101,7 @@
   .leaflet-container {
     touch-action: none;
     -webkit-tap-highlight-color: transparent;
+    height: calc(100vh - 16rem) !important; /* מרווח לכרטיסיות */
   }
 
   .leaflet-touch .leaflet-control-zoom {
@@ -155,6 +156,34 @@
   .leaflet-touch .leaflet-bar {
     border: none;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  /* סגנונות לרשימת הכרטיסיות במצב מפה */
+  .mobile-spots-list {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: transparent;
+    z-index: 1000;
+    padding: 0.5rem;
+    height: 8rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .mobile-spots-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-spots-list-inner {
+    display: flex;
+    gap: 0.5rem;
+    height: 100%;
+    padding: 0.25rem;
   }
 
   .spot-details-container {
