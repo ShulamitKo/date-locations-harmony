@@ -255,8 +255,28 @@ export default function HomePage() {
       }, 850);
     }
 
+    // במובייל נגלול לכרטיסייה
+    if (window.innerWidth <= 768) {
+      const spotElement = document.getElementById(`spot-${spot.id}`);
+      if (spotElement) {
+        // נביא את הכרטיסייה למרכז התצוגה האופקית
+        spotElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center'
+        });
+
+        // נוסיף אפקט הדגשה
+        setTimeout(() => {
+          spotElement.classList.add('spot-highlight');
+          setTimeout(() => {
+            spotElement.classList.remove('spot-highlight');
+          }, 2000);
+        }, 800);
+      }
+    }
     // בדסקטופ נגלול לכרטיסיה
-    if (window.innerWidth > 768) {
+    else if (window.innerWidth > 768) {
       const spotElement = document.getElementById(`spot-${spot.id}`);
       if (spotElement) {
         spotElement.scrollIntoView({
