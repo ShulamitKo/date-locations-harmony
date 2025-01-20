@@ -101,7 +101,8 @@
   .leaflet-container {
     touch-action: none;
     -webkit-tap-highlight-color: transparent;
-    height: calc(100vh - 16rem) !important; /* מרווח לכרטיסיות */
+    height: 100% !important;
+    min-height: calc(100vh - 20rem) !important;
   }
 
   .leaflet-touch .leaflet-control-zoom {
@@ -160,12 +161,12 @@
 
   /* סגנונות לרשימת הכרטיסיות במצב מפה */
   .mobile-spots-list {
-    position: fixed;
-    bottom: 0;
+    position: absolute;
+    bottom: 1rem;
     left: 0;
     right: 0;
     background: transparent;
-    z-index: 1000;
+    z-index: 900;
     padding: 0.5rem;
     height: 8rem;
     overflow-x: auto;
@@ -186,16 +187,77 @@
     padding: 0.25rem;
   }
 
-  .spot-details-container {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 4rem);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+  .spot-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
-  .spot-details-content {
-    flex: 1;
+  .spot-card:hover {
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  /* סגנונות לפוטר קבוע במובייל */
+  .spot-details-container {
+    padding-bottom: 8rem !important;
+  }
+
+  /* מניעת הסתרת תוכן על ידי הפוטר הקבוע */
+  .main-content {
+    padding-bottom: 8rem;
+  }
+
+  /* הפוטר עצמו */
+  .mobile-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 8rem;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mobile-footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .mobile-footer-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+
+  .mobile-footer button {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-footer button:hover {
+    transform: translateY(-1px);
+  }
+
+  .mobile-footer button:active {
+    transform: translateY(0);
+  }
+
+  /* אפשור גלילה באזור המפה */
+  .map-scroll-container {
+    height: 100%;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
