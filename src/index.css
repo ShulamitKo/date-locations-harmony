@@ -105,40 +105,40 @@
     right: auto !important;
   }
 
+  /* עיצוב מותאם לפופאפ במובייל */
+  .leaflet-popup-content-wrapper {
+    padding: 0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+    max-width: 250px !important;
+  }
+
   .leaflet-popup-content {
-    margin: 13px 10px;
-    min-width: 200px;
+    margin: 0 !important;
+    min-width: unset !important;
   }
 
-  .leaflet-popup-content p {
-    margin: 8px 0;
+  .leaflet-popup-tip-container {
+    display: none !important;
   }
 
-  .leaflet-touch .leaflet-bar {
-    border: none;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  /* הסתרת הצל של הפופאפ במובייל */
+  .leaflet-popup {
+    margin-bottom: 0 !important;
   }
 
-  .leaflet-touch .leaflet-bar a {
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
+  .mobile-popup {
+    padding: 8px !important;
   }
 
-  /* שיפור ביצועים */
-  .leaflet-fade-anim .leaflet-tile,
-  .leaflet-fade-anim .leaflet-popup {
-    will-change: opacity;
-  }
-  
-  .leaflet-zoom-anim .leaflet-zoom-animated {
-    will-change: transform;
+  .mobile-popup h3 {
+    font-size: 14px !important;
+    margin-bottom: 2px !important;
   }
 
-  /* מניעת פליקרים */
-  .leaflet-container {
-    backface-visibility: hidden;
-    transform: translateZ(0);
+  .mobile-popup p {
+    font-size: 12px !important;
+    margin-bottom: 4px !important;
   }
 
   /* שיפור תצוגת טיילים */

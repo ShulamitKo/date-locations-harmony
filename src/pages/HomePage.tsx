@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Coffee, Utensils, Beer, Sparkles, MoreHorizontal, ArrowUpDown, MapPin, List, Map, X, ScrollText, FileText, RotateCcw } from "lucide-react";
+import { Plus, Coffee, Utensils, Beer, Sparkles, MoreHorizontal, ArrowUpDown, MapPin, List, Map, X, ScrollText, FileText, RotateCcw, Search } from "lucide-react";
 import type { Spot } from "@/lib/supabase/types";
 import { spotsTable } from "@/lib/supabase/config";
 import SpotCard from "@/components/SpotCard";
@@ -120,7 +120,9 @@ export default function HomePage() {
     sortByDistance: false
   });
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>(() => {
+    return window.innerWidth <= 768 ? 'map' : 'list';
+  });
   const [resetMap, setResetMap] = useState(false);
 
   useEffect(() => {
@@ -150,6 +152,16 @@ export default function HomePage() {
         }
       );
     }
+  }, []);
+
+  // הוספת מעקב אחר שינויי גודל מסך
+  useEffect(() => {
+    const handleResize = () => {
+      setViewMode(window.innerWidth <= 768 ? 'map' : 'list');
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const calculateDistance = (spot: Spot): number | null => {
@@ -292,11 +304,17 @@ export default function HomePage() {
                 <div className="flex-1">
                   <Button 
                     onClick={() => navigate('/add-spot')} 
-                    className="shadow-lg hover:shadow-xl transition-all rounded-full px-4 sm:px-6
-                    bg-pink-500 hover:bg-pink-600 text-white font-medium border-2 border-white/20"
+                    className="shadow-xl hover:shadow-2xl transition-all duration-300 rounded-full
+                    bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700
+                    text-white border-[3px] border-white/30
+                    w-12 h-12 sm:w-auto sm:h-auto sm:px-6
+                    flex items-center justify-center
+                    hover:scale-105 active:scale-95
+                    backdrop-blur-sm"
+                    title="הוסף מקום"
                   >
-                    <Plus className="h-4 w-4 sm:h-5 sm:w-5 ml-1 sm:ml-2" />
-                    <span className="text-sm sm:text-base">הוסף מקום</span>
+                    <Plus className="h-7 w-7 sm:h-5 sm:w-5 sm:ml-2 drop-shadow-md" strokeWidth={2.5} />
+                    <span className="hidden sm:inline text-base font-medium">הוסף מקום</span>
                   </Button>
                 </div>
                 <div className="flex-[2]">
@@ -307,16 +325,19 @@ export default function HomePage() {
                     מצאו את המקום המושלם לדייט הבא שלכם
                   </p>
                 </div>
-                <div className="flex-1 flex flex-col sm:flex-row justify-end gap-2">
+                <div className="flex-1 flex flex-row sm:flex-row justify-end items-start gap-1 sm:gap-2 -ml-2 sm:ml-0">
                   <TermsDialog
                     trigger={
                       <Button 
                         variant="outline" 
-                        size="sm" 
-                        className="bg-white/10 hover:bg-white/20 text-white transition-all rounded-full px-4 border-white/30 w-full sm:w-auto"
+                        size="icon"
+                        className="bg-white/10 hover:bg-white/20 text-white transition-all rounded-full border-white/30
+                          w-7 h-7 sm:w-auto sm:h-auto sm:px-4 sm:size-[unset]
+                          hover:scale-105 active:scale-95 duration-200"
+                        title="תנאי שימוש"
                       >
-                        <FileText className="h-4 w-4 ml-2" />
-                        <span>תנאי שימוש</span>
+                        <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:ml-2" />
+                        <span className="hidden sm:inline">תנאי שימוש</span>
                       </Button>
                     }
                   />
@@ -324,11 +345,14 @@ export default function HomePage() {
                     trigger={
                       <Button 
                         variant="outline" 
-                        size="sm" 
-                        className="bg-white/10 hover:bg-white/20 text-white transition-all rounded-full px-4 border-white/30 w-full sm:w-auto"
+                        size="icon"
+                        className="bg-white/10 hover:bg-white/20 text-white transition-all rounded-full border-white/30
+                          w-7 h-7 sm:w-auto sm:h-auto sm:px-4 sm:size-[unset]
+                          hover:scale-105 active:scale-95 duration-200"
+                        title="אודות"
                       >
-                        <ScrollText className="h-4 w-4 ml-2" />
-                        <span>אודות</span>
+                        <ScrollText className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:ml-2" />
+                        <span className="hidden sm:inline">אודות</span>
                       </Button>
                     }
                   />
@@ -338,52 +362,62 @@ export default function HomePage() {
           </div>
 
           {/* Header */}
-          <div className="p-4 bg-white shadow-sm">
-            <div className="container mx-auto flex flex-col gap-4">
+          <div className="p-2 sm:p-4 bg-white shadow-sm">
+            <div className="container mx-auto flex flex-col gap-2 sm:gap-4">
               {/* Search and Actions */}
-              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div className="flex items-center gap-4 w-full sm:w-auto">
-                  <Input
-                    placeholder="חיפוש מקומות..."
-                    value={filters.search}
-                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                    className="w-full sm:w-[300px]"
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-full hover:bg-primary hover:text-white transition-colors"
-                    onClick={handleReset}
-                    title="רענן חיפוש"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline" 
-                    onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
-                    className="sm:hidden flex items-center gap-2"
-                    size="sm"
-                  >
-                    {viewMode === 'list' ? (
-                      <>
-                        <Map className="h-4 w-4" />
-                        <span>תצוגת מפה</span>
-                      </>
-                    ) : (
-                      <>
-                        <List className="h-4 w-4" />
-                        <span>תצוגת רשימה</span>
-                      </>
-                    )}
-                  </Button>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-center justify-between">
+                {/* Search Bar and View Toggle */}
+                <div className="flex gap-2 w-full items-center">
+                  <div className="flex items-center gap-2 flex-1 bg-gray-50/80 backdrop-blur-sm rounded-full px-3 py-1.5 sm:px-4 sm:py-2 shadow-inner">
+                    <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
+                    <Input
+                      placeholder="חיפוש מקומות..."
+                      value={filters.search}
+                      onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                      className="w-full border-0 bg-transparent focus-visible:ring-0 px-0 placeholder:text-gray-400 text-sm h-7"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-gray-200/80 transition-colors h-6 w-6 sm:h-7 sm:w-7"
+                      onClick={handleReset}
+                      title="רענן חיפוש"
+                    >
+                      <RotateCcw className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-500" />
+                    </Button>
+                  </div>
+
+                  <div className="sm:hidden flex bg-gray-50/80 backdrop-blur-sm p-0.5 rounded-full shadow-inner">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setViewMode('list')}
+                      className={`flex items-center justify-center gap-1 rounded-full px-2.5 py-1 text-[11px] transition-all duration-200
+                        ${viewMode === 'list' ? 'bg-white text-primary shadow-sm' : 'text-primary/60 hover:text-primary/80'}`}
+                      title="תצוגת רשימה"
+                    >
+                      <List className="h-3 w-3" />
+                      רשימה
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setViewMode('map')}
+                      className={`flex items-center justify-center gap-1 rounded-full px-2.5 py-1 text-[11px] transition-all duration-200
+                        ${viewMode === 'map' ? 'bg-white text-primary shadow-sm' : 'text-primary/60 hover:text-primary/80'}`}
+                      title="תצוגת מפה"
+                    >
+                      <Map className="h-3 w-3" />
+                      מפה
+                    </Button>
+                  </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 w-full sm:w-auto">
-                  <div className="w-full sm:w-auto">
+                {/* Filters Section */}
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="flex-1 sm:flex-none">
                     <FilterBar filters={filters} setFilters={setFilters} />
                   </div>
                   {userLocation && (
-                    <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto">
+                    <div className="flex items-center gap-2">
                       <Select
                         value={filters.radius?.toString() || "all"}
                         onValueChange={(value) => setFilters({ 
@@ -391,13 +425,13 @@ export default function HomePage() {
                           radius: value === "all" ? null : Number(value)
                         })}
                       >
-                        <SelectTrigger className="w-[140px] sm:w-[180px]">
-                          <MapPin className="w-4 h-4 ml-2" />
-                          <SelectValue placeholder="הגבל רדיוס חיפוש" />
+                        <SelectTrigger className="h-8 sm:h-10 text-xs sm:text-sm w-[120px] sm:w-[180px] bg-gray-50/80 backdrop-blur-sm border-0 shadow-inner">
+                          <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5 sm:ml-2 text-gray-400" />
+                          <SelectValue placeholder="הגבל רדיוס" />
                         </SelectTrigger>
                         <SelectContent className="z-[9999] bg-white">
-                          <SelectItem value="all">הצג את כל המקומות</SelectItem>
-                          <SelectItem value="1">עד קילומטר אחד</SelectItem>
+                          <SelectItem value="all">הכל</SelectItem>
+                          <SelectItem value="1">עד 1 ק"מ</SelectItem>
                           <SelectItem value="5">עד 5 ק"מ</SelectItem>
                           <SelectItem value="10">עד 10 ק"מ</SelectItem>
                           <SelectItem value="20">עד 20 ק"מ</SelectItem>
@@ -409,10 +443,12 @@ export default function HomePage() {
                         variant={filters.sortByDistance ? "default" : "outline"}
                         onClick={() => setFilters({ ...filters, sortByDistance: !filters.sortByDistance })}
                         size="sm"
-                        className="flex items-center gap-2 min-w-[150px]"
+                        className={`h-8 sm:h-10 text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all duration-200
+                          ${filters.sortByDistance ? 'bg-primary text-white' : 'bg-gray-50/80 backdrop-blur-sm border-0 shadow-inner text-gray-600'}`}
                       >
-                        <ArrowUpDown className="w-4 h-4" />
-                        {filters.sortByDistance ? "מסודר לפי מרחק" : "סדר לפי מרחק"}
+                        <ArrowUpDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">סדר לפי מרחק</span>
+                        <span className="sm:hidden">מרחק</span>
                       </Button>
                     </div>
                   )}
@@ -625,34 +661,62 @@ export default function HomePage() {
                           className="leaflet-popup-custom"
                           offset={[0, -20]}
                         >
-                          <div dir="rtl" className="bg-white rounded-lg p-3 min-w-[200px]">
-                            <div className="flex items-center gap-2 mb-1.5">
+                          <div dir="rtl" className={`bg-white rounded-lg ${window.innerWidth <= 768 ? 'mobile-popup' : 'p-3 min-w-[200px]'}`}>
+                            <div className="flex items-center gap-2 mb-1">
                               {(() => {
                                 const Icon = categoryIcons2[spot.category];
-                                return <Icon className="w-4 h-4 text-indigo-600" />;
+                                return <Icon className={`${window.innerWidth <= 768 ? 'w-3 h-3' : 'w-4 h-4'} text-indigo-600`} />;
                               })()}
-                              <h3 className="font-medium text-base">{spot.name}</h3>
+                              <h3 className="font-medium">{spot.name}</h3>
                             </div>
-                            <p className="text-sm text-gray-600 mb-2">{spot.address}</p>
-                            {calculateDistance(spot) && (
-                              <p className="text-sm text-gray-500 mb-2">
-                                <MapPin className="w-3 h-3 inline-block ml-1" />
-                                {formatDistance(calculateDistance(spot))}
-                              </p>
+                            {window.innerWidth <= 768 ? (
+                              <>
+                                <p className="text-xs text-gray-500">
+                                  {spot.address.split(',')[0]}
+                                  {calculateDistance(spot) && (
+                                    <span className="mr-1">
+                                      • {formatDistance(calculateDistance(spot))}
+                                    </span>
+                                  )}
+                                </p>
+                                <div className="flex justify-end mt-1">
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    className="text-[11px] h-6 px-2"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/spot/${spot.id}`);
+                                    }}
+                                  >
+                                    לפרטים נוספים
+                                  </Button>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <p className="text-sm text-gray-600 mb-2">{spot.address}</p>
+                                {calculateDistance(spot) && (
+                                  <p className="text-sm text-gray-500 mb-2">
+                                    <MapPin className="w-3 h-3 inline-block ml-1" />
+                                    {formatDistance(calculateDistance(spot))}
+                                  </p>
+                                )}
+                                <div className="flex justify-end">
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    className="text-xs"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/spot/${spot.id}`);
+                                    }}
+                                  >
+                                    לפרטים נוספים
+                                  </Button>
+                                </div>
+                              </>
                             )}
-                            <div className="flex justify-end">
-                              <Button
-                                variant="default"
-                                size="sm"
-                                className="text-xs"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/spot/${spot.id}`);
-                                }}
-                              >
-                                לפרטים נוספים
-                              </Button>
-                            </div>
                           </div>
                         </Popup>
                       </Marker>
