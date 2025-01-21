@@ -11,7 +11,6 @@ import { useToast } from '@/components/ui/use-toast'
 import type { Spot } from '@/lib/supabase/types'
 import { spotsTable } from '@/lib/supabase/config'
 import Map from '@/components/Map'
-import { ArrowRight } from 'lucide-react'
 
 type SpotFormData = {
   name: string;

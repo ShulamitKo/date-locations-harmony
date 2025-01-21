@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/sheet';
 import { Filter, Coffee, Utensils, Beer, Sparkles, MapPin, DollarSign, ScrollText, Star, Trees, MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import type { Spot } from "@/lib/supabase/types";
 
 type CategoryType = 'מסעדה' | 'בית קפה' | 'בר' | 'אטרקציה' | 'טבע' | 'אחר';
 type RegionType = 'ירושלים' | 'מרכז' | 'צפון' | 'דרום';

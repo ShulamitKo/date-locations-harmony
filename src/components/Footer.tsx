@@ -1,4 +1,5 @@
-import { Copyright, MessageCircle } from 'lucide-react'
+import { Copyright } from 'lucide-react'
+import { ContactForm } from './ContactForm'
 
 export default function Footer() {
   return (
@@ -12,15 +13,7 @@ export default function Footer() {
           <div className="text-sm text-gray-400">
             Developed by Shulamit
           </div>
-          <a 
-            href="https://wa.me/972527609961" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-green-600 hover:text-green-700 transition-colors duration-200 hover:scale-105 active:scale-100"
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">צור קשר</span>
-          </a>
+          <ContactForm />
         </div>
       </div>
     </footer>

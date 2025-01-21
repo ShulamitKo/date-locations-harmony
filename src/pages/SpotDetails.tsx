@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -558,7 +558,7 @@ export default function SpotDetails() {
                             </p>
                           </div>
                           <Badge variant="outline" className="text-lg text-yellow-500 bg-yellow-50">
-                            {Array.from({ length: review.rating }).map((_, i) => "⭐").join("")}
+                            {Array.from({ length: review.rating }).map(() => "⭐").join("")}
                           </Badge>
                         </div>
                         <p className="mt-2">{review.content}</p>
