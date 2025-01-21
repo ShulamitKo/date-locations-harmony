@@ -17,11 +17,12 @@ export interface Database {
           address: string
           phone: string | null
           website: string | null
-          kosher_type: 'מהדרין' | 'רבנות' | 'לא כשר'
+          kosher_type: 'מהדרין' | 'רבנות' | 'לא כשר' | '?'
+          kosher_certificate: string | null
           noise_level: 'שקט' | 'בינוני' | 'רועש'
           suitable_for_first_date: boolean
-          category: 'מסעדה' | 'בית קפה' | 'בר' | 'אטרקציה' | 'אחר'
-          region: 'ירושלים' | 'מרכז' | 'שרון' | 'מודיעין והשפלה' | 'צפון' | 'דרום'
+          category: 'מסעדה' | 'בית קפה' | 'בר' | 'אטרקציה' | 'טבע' | 'אחר'
+          region: 'ירושלים' | 'מרכז' | 'צפון' | 'דרום'
           parking_available: boolean
           public_transport: boolean
           price_range: 'נמוך' | 'בינוני' | 'גבוה'
@@ -41,10 +42,11 @@ export interface Database {
           address: string
           phone?: string | null
           website?: string | null
-          kosher_type: 'מהדרין' | 'רבנות' | 'לא כשר'
+          kosher_type: 'מהדרין' | 'רבנות' | 'לא כשר' | '?'
+          kosher_certificate?: string | null
           noise_level: 'שקט' | 'בינוני' | 'רועש'
           suitable_for_first_date: boolean
-          category: 'מסעדה' | 'בית קפה' | 'בר' | 'אטרקציה' | 'אחר'
+          category: 'מסעדה' | 'בית קפה' | 'בר' | 'אטרקציה' | 'טבע' | 'אחר'
           region: 'ירושלים' | 'מרכז' | 'שרון' | 'מודיעין והשפלה' | 'צפון' | 'דרום'
           parking_available: boolean
           public_transport: boolean
@@ -65,10 +67,11 @@ export interface Database {
           address?: string
           phone?: string | null
           website?: string | null
-          kosher_type?: 'מהדרין' | 'רבנות' | 'לא כשר'
+          kosher_type?: 'מהדרין' | 'רבנות' | 'לא כשר' | '?'
+          kosher_certificate?: string | null
           noise_level?: 'שקט' | 'בינוני' | 'רועש'
           suitable_for_first_date?: boolean
-          category?: 'מסעדה' | 'בית קפה' | 'בר' | 'אטרקציה' | 'אחר'
+          category?: 'מסעדה' | 'בית קפה' | 'בר' | 'אטרקציה' | 'טבע' | 'אחר'
           region?: 'ירושלים' | 'מרכז' | 'שרון' | 'מודיעין והשפלה' | 'צפון' | 'דרום'
           parking_available?: boolean
           public_transport?: boolean

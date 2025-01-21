@@ -1,13 +1,13 @@
-
-import {  Coffee, Utensils, Beer, Sparkles, MoreHorizontal } from "lucide-react";
+import {  Coffee, Utensils, Beer, Sparkles, MoreHorizontal, Trees } from "lucide-react";
 import type { Spot } from "@/lib/supabase/types";
 
 const categoryIcons = {
-  cafe: Coffee,
-  restaurant: Utensils,
-  bar: Beer,
-  activity: Sparkles,
-  other: MoreHorizontal
+  'בית קפה': Coffee,
+  'מסעדה': Utensils,
+  'בר': Beer,
+  'אטרקציה': Sparkles,
+  'טבע': Trees,
+  'אחר': MoreHorizontal
 };
 
 interface SpotCardProps {
@@ -53,12 +53,11 @@ export default function SpotCard({ spot, onClick, isSelected, distance, compact 
           <span className={`
             px-2 py-0.5 rounded-full text-white
             ${compact ? 'text-[10px]' : 'text-xs'}
-            ${spot.kosher_type === 'mehadrin' ? 'bg-emerald-600' : 
-              spot.kosher_type === 'rabbanut' ? 'bg-blue-600' : 
+            ${spot.kosher_type === 'מהדרין' ? 'bg-emerald-600' : 
+              spot.kosher_type === 'רבנות' ? 'bg-blue-600' : 
               'bg-red-600'}
           `}>
-            {spot.kosher_type === 'mehadrin' ? 'מהדרין' :
-             spot.kosher_type === 'rabbanut' ? 'רבנות' : 'לא כשר'}
+            {spot.kosher_type}
           </span>
         )}
         {spot.suitable_for_first_date && !compact && (
@@ -67,7 +66,7 @@ export default function SpotCard({ spot, onClick, isSelected, distance, compact 
           </span>
         )}
         <span className={`px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full ${compact ? 'text-[10px]' : 'text-xs'}`}>
-          {'₪'.repeat(spot.price_range === 'low' ? 1 : spot.price_range === 'medium' ? 2 : 3)}
+          {'₪'.repeat(spot.price_range === 'נמוך' ? 1 : spot.price_range === 'בינוני' ? 2 : 3)}
         </span>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Coffee, Utensils, Beer, Sparkles, MoreHorizontal, ArrowUpDown, MapPin, List, Map, X, ScrollText, FileText, RotateCcw, Search } from "lucide-react";
+import { Plus, Coffee, Utensils, Beer, Sparkles, MoreHorizontal, Trees, ArrowUpDown, MapPin, List, Map, X, ScrollText, FileText, RotateCcw, Search } from "lucide-react";
 import type { Spot } from "@/lib/supabase/types";
 import { spotsTable } from "@/lib/supabase/config";
 import SpotCard from "@/components/SpotCard";
@@ -17,7 +17,7 @@ import { TermsDialog } from "@/components/TermsDialog";
 
 // Custom icons for different categories
 const categoryIcons = {
-  cafe: new L.Icon({
+  'בית קפה': new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-shadow.png',
     iconSize: [25, 41],
@@ -25,7 +25,7 @@ const categoryIcons = {
     popupAnchor: [1, -34],
     shadowSize: [41, 41]
   }),
-  restaurant: new L.Icon({
+  'מסעדה': new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-shadow.png',
     iconSize: [25, 41],
@@ -33,7 +33,7 @@ const categoryIcons = {
     popupAnchor: [1, -34],
     shadowSize: [41, 41]
   }),
-  bar: new L.Icon({
+  'בר': new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-shadow.png',
     iconSize: [25, 41],
@@ -41,7 +41,7 @@ const categoryIcons = {
     popupAnchor: [1, -34],
     shadowSize: [41, 41]
   }),
-  activity: new L.Icon({
+  'אטרקציה': new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-shadow.png',
     iconSize: [25, 41],
@@ -49,7 +49,15 @@ const categoryIcons = {
     popupAnchor: [1, -34],
     shadowSize: [41, 41]
   }),
-  other: new L.Icon({
+  'טבע': new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  }),
+  'אחר': new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-shadow.png',
     iconSize: [25, 41],
@@ -60,17 +68,18 @@ const categoryIcons = {
 };
 
 const categoryIcons2 = {
-  cafe: Coffee,
-  restaurant: Utensils,
-  bar: Beer,
-  activity: Sparkles,
-  other: MoreHorizontal
+  'בית קפה': Coffee,
+  'מסעדה': Utensils,
+  'בר': Beer,
+  'אטרקציה': Sparkles,
+  'טבע': Trees,
+  'אחר': MoreHorizontal
 };
 
-type CategoryType = 'cafe' | 'restaurant' | 'bar' | 'activity' | 'other';
-type RegionType = 'jerusalem' | 'center' | 'north' | 'south';
-type KosherType = 'mehadrin' | 'rabbanut' | 'none';
-type PriceRangeType = 'low' | 'medium' | 'high';
+type CategoryType = 'מסעדה' | 'בית קפה' | 'בר' | 'אטרקציה' | 'טבע' | 'אחר';
+type RegionType = 'ירושלים' | 'מרכז' | 'צפון' | 'דרום';
+type KosherType = 'מהדרין' | 'רבנות' | '?';
+type PriceRangeType = 'נמוך' | 'בינוני' | 'גבוה';
 
 interface Filters {
   search: string;
@@ -499,10 +508,7 @@ export default function HomePage() {
                             });
                           }}
                         >
-                          {category === 'cafe' ? 'בית קפה' :
-                           category === 'restaurant' ? 'מסעדה' :
-                           category === 'bar' ? 'בר' :
-                           category === 'activity' ? 'אטרקציה' : 'אחר'}
+                          {category}
                           <X className="h-3 w-3" />
                         </Badge>
                       ))}
@@ -518,9 +524,7 @@ export default function HomePage() {
                             });
                           }}
                         >
-                          {region === 'jerusalem' ? 'ירושלים' :
-                           region === 'center' ? 'מרכז' :
-                           region === 'north' ? 'צפון' : 'דרום'}
+                          {region}
                           <X className="h-3 w-3" />
                         </Badge>
                       ))}
@@ -530,8 +534,8 @@ export default function HomePage() {
                           variant="outline"
                           className={`
                             gap-1 cursor-pointer
-                            ${type === 'mehadrin' ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600' : 
-                              type === 'rabbanut' ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600' : 
+                            ${type === 'מהדרין' ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600' : 
+                              type === 'רבנות' ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600' : 
                               'bg-red-600 hover:bg-red-700 text-white border-red-600'}
                           `}
                           onClick={() => {
@@ -541,8 +545,7 @@ export default function HomePage() {
                             });
                           }}
                         >
-                          {type === 'mehadrin' ? 'מהדרין' :
-                           type === 'rabbanut' ? 'רבנות' : 'לא כשר'}
+                          {type}
                           <X className="h-3 w-3" />
                         </Badge>
                       ))}
@@ -558,8 +561,8 @@ export default function HomePage() {
                             });
                           }}
                         >
-                          {price === 'low' ? '₪ זול' :
-                           price === 'medium' ? '₪₪ בינוני' : '₪₪₪ יקר'}
+                          {price === 'נמוך' ? '₪ זול' :
+                           price === 'בינוני' ? '₪₪ בינוני' : '₪₪₪ יקר'}
                           <X className="h-3 w-3" />
                         </Badge>
                       ))}

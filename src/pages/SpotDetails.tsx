@@ -75,6 +75,7 @@ export default function SpotDetails() {
         phone: editedSpot.phone || null,
         website: editedSpot.website || null,
         kosher_type: editedSpot.kosher_type,
+        kosher_certificate: editedSpot.kosher_certificate || null,
         noise_level: editedSpot.noise_level,
         category: editedSpot.category,
         region: editedSpot.region,
@@ -238,54 +239,65 @@ export default function SpotDetails() {
                       <Label htmlFor="category">קטגוריה</Label>
                       <Select
                         value={editedSpot?.category}
-                        onValueChange={(value: "cafe" | "restaurant" | "bar" | "activity" | "other") => 
+                        onValueChange={(value: "מסעדה" | "בית קפה" | "בר" | "אטרקציה" | "טבע" | "אחר") => 
                           setEditedSpot(prev => prev ? { ...prev, category: value } : null)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="בחר קטגוריה" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="cafe">בית קפה</SelectItem>
-                          <SelectItem value="restaurant">מסעדה</SelectItem>
-                          <SelectItem value="bar">בר</SelectItem>
-                          <SelectItem value="activity">אטרקציה</SelectItem>
-                          <SelectItem value="other">אחר</SelectItem>
+                        <SelectContent className="bg-white">
+                          <SelectItem value="בית קפה">בית קפה</SelectItem>
+                          <SelectItem value="מסעדה">מסעדה</SelectItem>
+                          <SelectItem value="בר">בר</SelectItem>
+                          <SelectItem value="אטרקציה">אטרקציה</SelectItem>
+                          <SelectItem value="טבע">טבע</SelectItem>
+                          <SelectItem value="אחר">אחר</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="kosher_type">כשרות</Label>
+                      <Label htmlFor="kosher_type">רמת כשרות</Label>
                       <Select
                         value={editedSpot?.kosher_type}
-                        onValueChange={(value: "mehadrin" | "rabbanut" | "none") => 
+                        onValueChange={(value: "מהדרין" | "רבנות" | "?") => 
                           setEditedSpot(prev => prev ? { ...prev, kosher_type: value } : null)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="בחר כשרות" />
+                          <SelectValue placeholder="בחר רמת כשרות" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="mehadrin">מהדרין</SelectItem>
-                          <SelectItem value="rabbanut">רבנות</SelectItem>
-                          <SelectItem value="none">לא כשר</SelectItem>
+                        <SelectContent className="bg-white">
+                          <SelectItem value="מהדרין">מהדרין</SelectItem>
+                          <SelectItem value="רבנות">רבנות</SelectItem>
+                          <SelectItem value="?">?</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="kosher_certificate">שם הכשרות</Label>
+                      <Input
+                        id="kosher_certificate"
+                        value={editedSpot?.kosher_certificate || ''}
+                        onChange={(e) => setEditedSpot(prev => prev ? { ...prev, kosher_certificate: e.target.value } : null)}
+                        placeholder="לדוגמה: רבנות ירושלים"
+                      />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="noise_level">רמת רעש</Label>
                       <Select
                         value={editedSpot?.noise_level}
-                        onValueChange={(value: "quiet" | "moderate" | "loud") => 
+                        onValueChange={(value: "שקט" | "בינוני" | "רועש") => 
                           setEditedSpot(prev => prev ? { ...prev, noise_level: value } : null)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="בחר רמת רעש" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="quiet">שקט</SelectItem>
-                          <SelectItem value="moderate">בינוני</SelectItem>
-                          <SelectItem value="loud">רועש</SelectItem>
+                        <SelectContent className="bg-white">
+                          <SelectItem value="שקט">שקט</SelectItem>
+                          <SelectItem value="בינוני">בינוני</SelectItem>
+                          <SelectItem value="רועש">רועש</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -294,17 +306,17 @@ export default function SpotDetails() {
                       <Label htmlFor="region">אזור</Label>
                       <Select
                         value={editedSpot?.region}
-                        onValueChange={(value: "north" | "center" | "south" | "jerusalem") => 
+                        onValueChange={(value: "ירושלים" | "מרכז" | "צפון" | "דרום") => 
                           setEditedSpot(prev => prev ? { ...prev, region: value } : null)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="בחר אזור" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="jerusalem">ירושלים</SelectItem>
-                          <SelectItem value="center">מרכז</SelectItem>
-                          <SelectItem value="north">צפון</SelectItem>
-                          <SelectItem value="south">דרום</SelectItem>
+                        <SelectContent className="bg-white">
+                          <SelectItem value="ירושלים">ירושלים</SelectItem>
+                          <SelectItem value="מרכז">מרכז</SelectItem>
+                          <SelectItem value="צפון">צפון</SelectItem>
+                          <SelectItem value="דרום">דרום</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -313,16 +325,16 @@ export default function SpotDetails() {
                       <Label htmlFor="price_range">טווח מחירים</Label>
                       <Select
                         value={editedSpot?.price_range}
-                        onValueChange={(value: "low" | "medium" | "high") => 
+                        onValueChange={(value: "נמוך" | "בינוני" | "גבוה") => 
                           setEditedSpot(prev => prev ? { ...prev, price_range: value } : null)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="בחר טווח מחירים" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="low">₪ זול</SelectItem>
-                          <SelectItem value="medium">₪₪ בינוני</SelectItem>
-                          <SelectItem value="high">₪₪₪ יקר</SelectItem>
+                        <SelectContent className="bg-white">
+                          <SelectItem value="נמוך">₪ זול</SelectItem>
+                          <SelectItem value="בינוני">₪₪ בינוני</SelectItem>
+                          <SelectItem value="גבוה">₪₪₪ יקר</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -424,9 +436,20 @@ export default function SpotDetails() {
                   <>
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="outline">{getCategoryDisplay(spot.category)}</Badge>
-                      <Badge variant="outline">
-                        {getKosherTypeDisplay(spot.kosher_type)}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className={`
+                          ${spot.kosher_type === 'מהדרין' ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600' : 
+                            spot.kosher_type === 'רבנות' ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600' : 
+                            'bg-red-600 hover:bg-red-700 text-white border-red-600'}
+                        `}>
+                          {getKosherTypeDisplay(spot.kosher_type)}
+                        </Badge>
+                        {spot.kosher_certificate && (
+                          <span className="text-sm text-gray-600">
+                            {spot.kosher_certificate}
+                          </span>
+                        )}
+                      </div>
                       <Badge variant="outline">
                         {getPriceRangeDisplay(spot.price_range)}
                       </Badge>

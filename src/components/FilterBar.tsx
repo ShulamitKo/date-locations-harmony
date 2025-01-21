@@ -7,13 +7,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Filter, Coffee, Utensils, Beer, Sparkles, MapPin, DollarSign, ScrollText, Star} from 'lucide-react';
+import { Filter, Coffee, Utensils, Beer, Sparkles, MapPin, DollarSign, ScrollText, Star, Trees, MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import type { Spot } from "@/lib/supabase/types";
 
-type CategoryType = 'cafe' | 'restaurant' | 'bar' | 'activity' | 'other';
-type RegionType = 'jerusalem' | 'center' | 'north' | 'south';
-type KosherType = 'mehadrin' | 'rabbanut' | 'none';
-type PriceRangeType = 'low' | 'medium' | 'high';
+type CategoryType = 'מסעדה' | 'בית קפה' | 'בר' | 'אטרקציה' | 'טבע' | 'אחר';
+type RegionType = 'ירושלים' | 'מרכז' | 'צפון' | 'דרום';
+type KosherType = 'מהדרין' | 'רבנות' | '?';
+type PriceRangeType = 'נמוך' | 'בינוני' | 'גבוה';
 
 export interface Filters {
   search: string;
@@ -138,36 +139,52 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Button
-                  variant={filters.categories.includes('cafe') ? 'default' : 'outline'}
-                  onClick={() => toggleCategoryFilter('cafe')}
+                  variant={filters.categories.includes('בית קפה') ? 'default' : 'outline'}
+                  onClick={() => toggleCategoryFilter('בית קפה')}
                   className="justify-start transition-all duration-200 hover:-translate-x-1"
                 >
                   <Coffee className="h-4 w-4 ml-2" />
                   בית קפה
                 </Button>
                 <Button
-                  variant={filters.categories.includes('restaurant') ? 'default' : 'outline'}
-                  onClick={() => toggleCategoryFilter('restaurant')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.categories.includes('restaurant') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.categories.includes('מסעדה') ? 'default' : 'outline'}
+                  onClick={() => toggleCategoryFilter('מסעדה')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.categories.includes('מסעדה') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   <Utensils className="h-4 w-4 ml-2" />
                   מסעדה
                 </Button>
                 <Button
-                  variant={filters.categories.includes('bar') ? 'default' : 'outline'}
-                  onClick={() => toggleCategoryFilter('bar')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.categories.includes('bar') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.categories.includes('בר') ? 'default' : 'outline'}
+                  onClick={() => toggleCategoryFilter('בר')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.categories.includes('בר') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   <Beer className="h-4 w-4 ml-2" />
                   בר
                 </Button>
                 <Button
-                  variant={filters.categories.includes('activity') ? 'default' : 'outline'}
-                  onClick={() => toggleCategoryFilter('activity')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.categories.includes('activity') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.categories.includes('אטרקציה') ? 'default' : 'outline'}
+                  onClick={() => toggleCategoryFilter('אטרקציה')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.categories.includes('אטרקציה') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   <Sparkles className="h-4 w-4 ml-2" />
                   אטרקציה
+                </Button>
+                <Button
+                  variant={filters.categories.includes('טבע') ? 'default' : 'outline'}
+                  onClick={() => toggleCategoryFilter('טבע')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.categories.includes('טבע') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                >
+                  <Trees className="h-4 w-4 ml-2" />
+                  טבע
+                </Button>
+                <Button
+                  variant={filters.categories.includes('אחר') ? 'default' : 'outline'}
+                  onClick={() => toggleCategoryFilter('אחר')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.categories.includes('אחר') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                >
+                  <MoreHorizontal className="h-4 w-4 ml-2" />
+                  אחר
                 </Button>
               </div>
             </div>
@@ -180,30 +197,30 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Button
-                  variant={filters.regions.includes('jerusalem') ? 'default' : 'outline'}
-                  onClick={() => toggleRegionFilter('jerusalem')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.regions.includes('jerusalem') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.regions.includes('ירושלים') ? 'default' : 'outline'}
+                  onClick={() => toggleRegionFilter('ירושלים')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.regions.includes('ירושלים') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   ירושלים
                 </Button>
                 <Button
-                  variant={filters.regions.includes('center') ? 'default' : 'outline'}
-                  onClick={() => toggleRegionFilter('center')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.regions.includes('center') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.regions.includes('מרכז') ? 'default' : 'outline'}
+                  onClick={() => toggleRegionFilter('מרכז')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.regions.includes('מרכז') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   מרכז
                 </Button>
                 <Button
-                  variant={filters.regions.includes('north') ? 'default' : 'outline'}
-                  onClick={() => toggleRegionFilter('north')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.regions.includes('north') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.regions.includes('צפון') ? 'default' : 'outline'}
+                  onClick={() => toggleRegionFilter('צפון')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.regions.includes('צפון') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   צפון
                 </Button>
                 <Button
-                  variant={filters.regions.includes('south') ? 'default' : 'outline'}
-                  onClick={() => toggleRegionFilter('south')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.regions.includes('south') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.regions.includes('דרום') ? 'default' : 'outline'}
+                  onClick={() => toggleRegionFilter('דרום')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.regions.includes('דרום') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   דרום
                 </Button>
@@ -218,23 +235,23 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
               </div>
               <div className="grid grid-cols-1 gap-2">
                 <Button
-                  variant={filters.priceRanges.includes('low') ? 'default' : 'outline'}
-                  onClick={() => togglePriceRangeFilter('low')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.priceRanges.includes('low') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.priceRanges.includes('נמוך') ? 'default' : 'outline'}
+                  onClick={() => togglePriceRangeFilter('נמוך')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.priceRanges.includes('נמוך') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   ₪ זול
                 </Button>
                 <Button
-                  variant={filters.priceRanges.includes('medium') ? 'default' : 'outline'}
-                  onClick={() => togglePriceRangeFilter('medium')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.priceRanges.includes('medium') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.priceRanges.includes('בינוני') ? 'default' : 'outline'}
+                  onClick={() => togglePriceRangeFilter('בינוני')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.priceRanges.includes('בינוני') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   ₪₪ בינוני
                 </Button>
                 <Button
-                  variant={filters.priceRanges.includes('high') ? 'default' : 'outline'}
-                  onClick={() => togglePriceRangeFilter('high')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.priceRanges.includes('high') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.priceRanges.includes('גבוה') ? 'default' : 'outline'}
+                  onClick={() => togglePriceRangeFilter('גבוה')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.priceRanges.includes('גבוה') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
                 >
                   ₪₪₪ יקר
                 </Button>
@@ -249,25 +266,25 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
               </div>
               <div className="grid grid-cols-1 gap-2">
                 <Button
-                  variant={filters.kosherTypes.includes('mehadrin') ? 'default' : 'outline'}
-                  onClick={() => toggleKosherTypeFilter('mehadrin')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('mehadrin') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.kosherTypes.includes('מהדרין') ? 'default' : 'outline'}
+                  onClick={() => toggleKosherTypeFilter('מהדרין')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('מהדרין') ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
                 >
                   מהדרין
                 </Button>
                 <Button
-                  variant={filters.kosherTypes.includes('rabbanut') ? 'default' : 'outline'}
-                  onClick={() => toggleKosherTypeFilter('rabbanut')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('rabbanut') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.kosherTypes.includes('רבנות') ? 'default' : 'outline'}
+                  onClick={() => toggleKosherTypeFilter('רבנות')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('רבנות') ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
                 >
                   רבנות
                 </Button>
                 <Button
-                  variant={filters.kosherTypes.includes('none') ? 'default' : 'outline'}
-                  onClick={() => toggleKosherTypeFilter('none')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('none') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.kosherTypes.includes('?') ? 'default' : 'outline'}
+                  onClick={() => toggleKosherTypeFilter('?')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('?') ? 'bg-red-600 hover:bg-red-700' : ''}`}
                 >
-                  לא כשר
+                  ?
                 </Button>
               </div>
             </div>

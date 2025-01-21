@@ -5,11 +5,12 @@ export interface Spot {
   address: string;
   phone: string | null;
   website: string | null;
-  kosher_type: "mehadrin" | "rabbanut" | "none";
-  noise_level: "quiet" | "moderate" | "loud";
-  category: "cafe" | "restaurant" | "bar" | "activity" | "other";
-  region: "jerusalem" | "center" | "north" | "south";
-  price_range: "low" | "medium" | "high";
+  kosher_type: "מהדרין" | "רבנות" | "?";
+  kosher_certificate: string | null;
+  noise_level: "שקט" | "בינוני" | "רועש";
+  category: "מסעדה" | "בית קפה" | "בר" | "אטרקציה" | "טבע" | "אחר";
+  region: "ירושלים" | "מרכז" | "צפון" | "דרום";
+  price_range: "נמוך" | "בינוני" | "גבוה";
   suitable_for_first_date: boolean;
   parking_available: boolean;
   public_transport: boolean;
