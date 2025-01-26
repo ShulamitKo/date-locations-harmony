@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Filters } from '@/components/FilterBar';
-import { FilterBar } from '@/components/FilterBar';
+import { FilterBar } from "@/components/FilterBar";
+import { type Filters } from "@/lib/types";
 import SpotCard from '@/components/SpotCard';
 import { useSpots } from '@/hooks/useSpots';
 
@@ -29,9 +29,13 @@ export default function Index() {
       return false;
     }
 
-    // סינון לפי כשרות
-    if (filters.kosherTypes.length > 0 && !filters.kosherTypes.includes(spot.kosher_type)) {
-      return false;
+    // סינון לפי כשרות - רק עבור מסעדות, בתי קפה וברים
+    if (filters.kosherTypes.length > 0) {
+      if (['מסעדה', 'בית קפה', 'בר'].includes(spot.category)) {
+        if (!filters.kosherTypes.includes(spot.kosher_type)) {
+          return false;
+        }
+      }
     }
 
     // סינון לפי קטגוריה

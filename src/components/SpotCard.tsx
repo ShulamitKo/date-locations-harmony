@@ -49,13 +49,11 @@ export default function SpotCard({ spot, onClick, isSelected, distance, compact 
       <p className={`text-muted-foreground ${compact ? 'text-xs' : 'text-sm'}`}>{spot.address}</p>
       
       <div className={`flex flex-wrap gap-1.5 ${compact ? 'mt-2' : 'mt-3'}`}>
-        {spot.kosher_type && (
+        {spot.kosher_type && ['מהדרין', 'רבנות'].includes(spot.kosher_type) && (
           <span className={`
             px-2 py-0.5 rounded-full text-white
             ${compact ? 'text-[10px]' : 'text-xs'}
-            ${spot.kosher_type === 'מהדרין' ? 'bg-emerald-600' : 
-              spot.kosher_type === 'רבנות' ? 'bg-blue-600' : 
-              'bg-red-600'}
+            ${spot.kosher_type === 'מהדרין' ? 'bg-emerald-600' : 'bg-blue-600'}
           `}>
             {spot.kosher_type}
           </span>

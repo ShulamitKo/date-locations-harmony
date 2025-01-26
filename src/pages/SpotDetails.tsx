@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowRight, Phone, Globe, Clock, Calendar, MapPin, Pencil } from "lucide-react";
+import { ArrowRight, Phone, Globe, Clock, Calendar, MapPin, Pencil, UtensilsCrossed, Coffee, Beer, Palmtree, Building2, Gamepad2, Tent, Bike, Store, CircleDollarSign, Map as MapIcon, Volume2, Heart } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import type { Spot, Review } from "@/lib/supabase/types";
 import { spotsTable, reviewsTable } from "@/lib/supabase/config";
@@ -23,6 +23,29 @@ interface ReviewForm {
   content: string;
   visit_date: string;
 }
+
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case 'מסעדה':
+      return <UtensilsCrossed className="h-4 w-4" />;
+    case 'בית קפה':
+      return <Coffee className="h-4 w-4" />;
+    case 'בר':
+      return <Beer className="h-4 w-4" />;
+    case 'אטרקציה':
+      return <Palmtree className="h-4 w-4" />;
+    case 'מוזיאון':
+      return <Building2 className="h-4 w-4" />;
+    case 'משחקייה':
+      return <Gamepad2 className="h-4 w-4" />;
+    case 'פארק':
+      return <Tent className="h-4 w-4" />;
+    case 'ספורט':
+      return <Bike className="h-4 w-4" />;
+    default:
+      return <Store className="h-4 w-4" />;
+  }
+};
 
 export default function SpotDetails() {
   const { id } = useParams<{ id: string }>();
@@ -69,32 +92,21 @@ export default function SpotDetails() {
       console.log('Starting update process');
       console.log('Original editedSpot:', JSON.stringify(editedSpot, null, 2));
       
-      const spotToUpdate = {
-        name: editedSpot.name,
-        address: editedSpot.address,
+      const spotToSend = {
+        ...editedSpot,
         phone: editedSpot.phone || null,
         website: editedSpot.website || null,
-        kosher_type: editedSpot.kosher_type,
-        kosher_certificate: editedSpot.kosher_certificate || null,
-        noise_level: editedSpot.noise_level,
-        category: editedSpot.category,
-        region: editedSpot.region,
-        price_range: editedSpot.price_range,
-        suitable_for_first_date: editedSpot.suitable_for_first_date,
-        parking_available: editedSpot.parking_available,
-        public_transport: editedSpot.public_transport,
+        kosher_type: ['מסעדה', 'בית קפה', 'בר'].includes(editedSpot.category) ? editedSpot.kosher_type : null,
+        kosher_certificate: ['מסעדה', 'בית קפה', 'בר'].includes(editedSpot.category) ? (editedSpot.kosher_certificate || null) : null,
         opening_hours: editedSpot.opening_hours || null,
         recommended_time: editedSpot.recommended_time || null,
-        reservation_required: editedSpot.reservation_required,
-        notes: editedSpot.notes || null,
-        latitude: editedSpot.latitude,
-        longitude: editedSpot.longitude
+        notes: editedSpot.notes || null
       };
 
-      console.log('Prepared spotToUpdate:', JSON.stringify(spotToUpdate, null, 2));
+      console.log('Prepared spotToSend:', JSON.stringify(spotToSend, null, 2));
       console.log('Spot ID:', editedSpot.id);
       
-      const updatedSpot = await spotsTable.update(editedSpot.id, spotToUpdate);
+      const updatedSpot = await spotsTable.update(editedSpot.id, spotToSend);
       console.log('Response from server:', JSON.stringify(updatedSpot, null, 2));
       
       if (!updatedSpot) {
@@ -256,33 +268,38 @@ export default function SpotDetails() {
                       </Select>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="kosher_type">רמת כשרות</Label>
-                      <Select
-                        value={editedSpot?.kosher_type}
-                        onValueChange={(value: "מהדרין" | "רבנות" | "?") => 
-                          setEditedSpot(prev => prev ? { ...prev, kosher_type: value } : null)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="בחר רמת כשרות" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white">
-                          <SelectItem value="מהדרין">מהדרין</SelectItem>
-                          <SelectItem value="רבנות">רבנות</SelectItem>
-                          <SelectItem value="?">?</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {/* שדות כשרות - מוצגים רק עבור מסעדות, בתי קפה וברים */}
+                    {['מסעדה', 'בית קפה', 'בר'].includes(editedSpot?.category || '') && (
+                      <>
+                        <div className="space-y-2">
+                          <Label htmlFor="kosher_type">רמת כשרות</Label>
+                          <Select
+                            value={editedSpot?.kosher_type || "?"}
+                            onValueChange={(value: "מהדרין" | "רבנות" | "?") => 
+                              setEditedSpot(prev => prev ? { ...prev, kosher_type: value } : null)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="בחר רמת כשרות" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white">
+                              <SelectItem value="מהדרין">מהדרין</SelectItem>
+                              <SelectItem value="רבנות">רבנות</SelectItem>
+                              <SelectItem value="?">?</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="kosher_certificate">שם הכשרות</Label>
-                      <Input
-                        id="kosher_certificate"
-                        value={editedSpot?.kosher_certificate || ''}
-                        onChange={(e) => setEditedSpot(prev => prev ? { ...prev, kosher_certificate: e.target.value } : null)}
-                        placeholder="לדוגמה: רבנות ירושלים"
-                      />
-                    </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kosher_certificate">שם הכשרות</Label>
+                          <Input
+                            id="kosher_certificate"
+                            value={editedSpot?.kosher_certificate || ''}
+                            onChange={(e) => setEditedSpot(prev => prev ? { ...prev, kosher_certificate: e.target.value } : null)}
+                            placeholder="לדוגמה: רבנות ירושלים"
+                          />
+                        </div>
+                      </>
+                    )}
 
                     <div className="space-y-2">
                       <Label htmlFor="noise_level">רמת רעש</Label>
@@ -435,32 +452,64 @@ export default function SpotDetails() {
                 ) : (
                   <>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline">{getCategoryDisplay(spot.category)}</Badge>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className={`
-                          ${spot.kosher_type === 'מהדרין' ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600' : 
-                            spot.kosher_type === 'רבנות' ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600' : 
-                            'bg-red-600 hover:bg-red-700 text-white border-red-600'}
-                        `}>
-                          {getKosherTypeDisplay(spot.kosher_type)}
-                        </Badge>
-                        {spot.kosher_certificate && (
-                          <span className="text-sm text-gray-600">
-                            {spot.kosher_certificate}
-                          </span>
-                        )}
-                      </div>
-                      <Badge variant="outline">
-                        {getPriceRangeDisplay(spot.price_range)}
+                      {/* תגית קטגוריה - צבע סגול */}
+                      <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200">
+                        <div className="flex items-center gap-1">
+                          {getCategoryIcon(spot.category)}
+                          {getCategoryDisplay(spot.category)}
+                        </div>
                       </Badge>
-                      <Badge>{getRegionDisplay(spot.region)}</Badge>
+
+                      {/* תגית כשרות */}
+                      {spot.kosher_type && (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className={`
+                            ${spot.kosher_type === 'מהדרין' ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600' : 
+                              spot.kosher_type === 'רבנות' ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600' : 
+                              'bg-red-600 hover:bg-red-700 text-white border-red-600'}
+                          `}>
+                            רמת כשרות: {getKosherTypeDisplay(spot.kosher_type)}
+                          </Badge>
+                          {spot.kosher_certificate && (
+                            <span className="text-sm text-gray-600">
+                              {spot.kosher_certificate}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* תגית מחיר - צבע כתום */}
+                      <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300 hover:bg-orange-200">
+                        <div className="flex items-center gap-1">
+                          <CircleDollarSign className="h-4 w-4" />
+                          רמת מחיר: {getPriceRangeDisplay(spot.price_range)}
+                        </div>
+                      </Badge>
+
+                      {/* תגית אזור - צבע כחול */}
+                      <Badge className="bg-sky-100 text-sky-800 border-sky-300 hover:bg-sky-200">
+                        <div className="flex items-center gap-1">
+                          <MapIcon className="h-4 w-4" />
+                          {getRegionDisplay(spot.region)}
+                        </div>
+                      </Badge>
+
+                      {/* תגית דייט ראשון - צבע ירוק */}
                       {spot.suitable_for_first_date && (
-                        <Badge variant="outline" className="bg-green-50">
-                          מתאים לדייט ראשון
+                        <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 hover:bg-green-200">
+                          <div className="flex items-center gap-1">
+                            <Heart className="h-4 w-4" />
+                            מתאים לדייט ראשון
+                          </div>
                         </Badge>
                       )}
-                      <Badge variant="outline">
-                        רמת רעש: {getNoiseLevelDisplay(spot.noise_level)}
+
+                      {/* תגית רמת רעש - צבע אפור */}
+                      <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-200">
+                        <div className="flex items-center gap-1">
+                          <Volume2 className="h-4 w-4" />
+                          רמת רעש: {getNoiseLevelDisplay(spot.noise_level)}
+                        </div>
                       </Badge>
                     </div>
 

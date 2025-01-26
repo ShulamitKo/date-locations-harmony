@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { FilterBar } from "@/components/FilterBar";
 import { AboutDialog } from "@/components/AboutDialog";
 import { TermsDialog } from "@/components/TermsDialog";
+import { type Filters } from '@/lib/types';
 
 // Custom icons for different categories
 const categoryIcons = {
@@ -65,7 +66,7 @@ const categoryIcons = {
     popupAnchor: [1, -34],
     shadowSize: [41, 41]
   })
-};
+} as const;
 
 const categoryIcons2 = {
   'בית קפה': Coffee,
@@ -74,25 +75,7 @@ const categoryIcons2 = {
   'אטרקציה': Sparkles,
   'טבע': Trees,
   'אחר': MoreHorizontal
-};
-
-type CategoryType = 'מסעדה' | 'בית קפה' | 'בר' | 'אטרקציה' | 'טבע' | 'אחר';
-type RegionType = 'ירושלים' | 'מרכז' | 'צפון' | 'דרום';
-type KosherType = 'מהדרין' | 'רבנות' | '?';
-type PriceRangeType = 'נמוך' | 'בינוני' | 'גבוה';
-
-interface Filters {
-  search: string;
-  categories: CategoryType[];
-  regions: RegionType[];
-  kosherTypes: KosherType[];
-  priceRanges: PriceRangeType[];
-  suitableForFirstDate: boolean;
-  parkingAvailable: boolean;
-  publicTransport: boolean;
-  radius: number | null;
-  sortByDistance: boolean;
-}
+} as const;
 
 // Component to handle map bounds
 function MapBoundsHandler({ spots, resetMap }: { spots: Spot[], resetMap: boolean }) {
@@ -116,18 +99,31 @@ export default function HomePage() {
   const [selectedSpot, setSelectedSpot] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [filters, setFilters] = useState<Filters>({
-    search: "",
-    categories: [],
-    regions: [],
-    kosherTypes: [],
-    priceRanges: [],
-    suitableForFirstDate: false,
-    parkingAvailable: false,
-    publicTransport: false,
-    radius: null,
-    sortByDistance: false
+  const [filters, setFilters] = useState<Filters>(() => {
+    // טעינת הפילטרים מ-localStorage בעת טעינת הדף
+    const savedFilters = localStorage.getItem('spotFilters');
+    if (savedFilters) {
+      return JSON.parse(savedFilters);
+    }
+    return {
+      search: "",
+      categories: [],
+      regions: [],
+      kosherTypes: [],
+      priceRanges: [],
+      suitableForFirstDate: false,
+      parkingAvailable: false,
+      publicTransport: false,
+      radius: null,
+      sortByDistance: false
+    };
   });
+
+  // שמירת הפילטרים ב-localStorage בכל פעם שהם משתנים
+  useEffect(() => {
+    localStorage.setItem('spotFilters', JSON.stringify(filters));
+  }, [filters]);
+
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>(() => {
     return window.innerWidth <= 768 ? 'map' : 'list';
@@ -493,9 +489,15 @@ export default function HomePage() {
                   filters.regions.length > 0 || 
                   filters.kosherTypes.length > 0 || 
                   filters.priceRanges.length > 0 || 
-                  filters.suitableForFirstDate) && (
+                  filters.suitableForFirstDate ||
+                  filters.search ||
+                  filters.parkingAvailable ||
+                  filters.publicTransport ||
+                  filters.radius !== null ||
+                  filters.sortByDistance) && (
                   <div className="overflow-x-auto -mx-4 px-4 sm:overflow-visible sm:mx-0 sm:px-0">
                     <div className="flex flex-nowrap gap-2 min-w-max sm:flex-wrap sm:min-w-0">
+                      {/* תגיות קיימות */}
                       {filters.categories.map(category => (
                         <Badge
                           key={category}
@@ -581,6 +583,30 @@ export default function HomePage() {
                           <X className="h-3 w-3" />
                         </Badge>
                       )}
+
+                      {/* כפתור נקה סינון */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setFilters({
+                          search: "",
+                          categories: [],
+                          regions: [],
+                          kosherTypes: [],
+                          priceRanges: [],
+                          suitableForFirstDate: false,
+                          parkingAvailable: false,
+                          publicTransport: false,
+                          radius: null,
+                          sortByDistance: false
+                        })}
+                        className="gap-1.5 h-6 text-xs bg-red-50 hover:bg-red-100 text-red-600 border-red-200 
+                          hover:border-red-300 transition-all duration-200 font-medium shadow-sm hover:shadow
+                          rounded-full px-2.5 whitespace-nowrap"
+                      >
+                        נקה סינון
+                        <X className="h-3 w-3 text-red-500" />
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -593,7 +619,7 @@ export default function HomePage() {
               <div className={`
                 ${viewMode === 'map' ? 'absolute bottom-4 left-0 right-0 z-[900] h-32 bg-transparent backdrop-blur-none' : 'h-full overflow-y-auto pb-32 sm:pb-0'}
                 ${viewMode === 'list' ? 'block' : viewMode === 'map' ? 'block' : 'hidden'}
-                sm:relative sm:block sm:max-w-[400px] sm:border-l sm:h-auto sm:shadow-none sm:bg-white sm:backdrop-blur-none
+                sm:relative sm:block sm:w-[400px] sm:flex-none sm:border-l sm:h-auto sm:shadow-none sm:bg-white sm:backdrop-blur-none
               `}>
                 <div className={`
                   ${viewMode === 'map' ? 'h-full overflow-x-auto overflow-y-hidden' : ''}

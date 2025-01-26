@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -9,20 +9,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/components/ui/use-toast'
 import type { Spot } from '@/lib/supabase/types'
+import { CategoryType, RegionType, PriceRangeType, NoiseLevel, KosherType } from '@/lib/types'
 import { spotsTable } from '@/lib/supabase/config'
 import Map from '@/components/Map'
 
-type SpotFormData = {
+// טיפוס עזר שממיר שדות null לstring ריק
+type FormSpot = {
   name: string;
   address: string;
   phone: string;
   website: string;
-  category: "מסעדה" | "בית קפה" | "בר" | "אטרקציה" | "טבע" | "אחר";
-  kosher_type: "מהדרין" | "רבנות" | "?";
+  category: CategoryType;
+  kosher_type: KosherType | null;
   kosher_certificate: string;
-  noise_level: "שקט" | "בינוני" | "רועש";
-  region: "ירושלים" | "מרכז" | "צפון" | "דרום";
-  price_range: "נמוך" | "בינוני" | "גבוה";
+  noise_level: NoiseLevel;
+  region: RegionType;
+  price_range: PriceRangeType;
   suitable_for_first_date: boolean;
   parking_available: boolean;
   public_transport: boolean;
@@ -39,13 +41,13 @@ export default function AddSpot() {
   const navigate = useNavigate()
   const { toast } = useToast()
   
-  const [newSpot, setNewSpot] = useState<SpotFormData>({
+  const [newSpot, setNewSpot] = useState<FormSpot>({
     name: "",
     address: "",
     phone: "",
     website: "",
     category: "אחר",
-    kosher_type: "?",
+    kosher_type: null,
     kosher_certificate: "",
     noise_level: "בינוני",
     region: "מרכז",
@@ -62,6 +64,21 @@ export default function AddSpot() {
     images: []
   });
 
+  useEffect(() => {
+    if (['מסעדה', 'בית קפה', 'בר'].includes(newSpot.category)) {
+      setNewSpot(prev => ({
+        ...prev,
+        kosher_type: prev.kosher_type || "?"
+      }));
+    } else {
+      setNewSpot(prev => ({
+        ...prev,
+        kosher_type: null,
+        kosher_certificate: ""
+      }));
+    }
+  }, [newSpot.category]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -74,29 +91,31 @@ export default function AddSpot() {
       });
       return;
     }
+
+    // Convert empty strings to null before sending to the server
+    const spotToSend: Omit<Spot, 'id' | 'created_at' | 'average_rating'> = {
+      ...newSpot,
+      phone: newSpot.phone || null,
+      website: newSpot.website || null,
+      kosher_type: ['מסעדה', 'בית קפה', 'בר'].includes(newSpot.category) ? newSpot.kosher_type : null,
+      kosher_certificate: ['מסעדה', 'בית קפה', 'בר'].includes(newSpot.category) ? (newSpot.kosher_certificate || null) : null,
+      opening_hours: newSpot.opening_hours || null,
+      recommended_time: newSpot.recommended_time || null,
+      notes: newSpot.notes || null
+    };
     
     try {
-      const spotData = {
-        ...newSpot,
-        phone: newSpot.phone || null,
-        website: newSpot.website || null,
-        opening_hours: newSpot.opening_hours || null,
-        recommended_time: newSpot.recommended_time || null,
-        kosher_certificate: newSpot.kosher_certificate || null,
-        notes: newSpot.notes || null,
-      };
-      
-      const createdSpot = await spotsTable.create(spotData);
+      await spotsTable.create(spotToSend);
       toast({
         title: "המקום נוסף בהצלחה",
-        description: "הפרטים נשמרו במערכת",
+        description: "המקום נוסף למאגר המקומות",
       });
-      navigate(`/spot/${createdSpot.id}`);
+      navigate('/');
     } catch (error) {
       console.error("Error creating spot:", error);
       toast({
         title: "שגיאה בהוספת המקום",
-        description: "אנא נסה שוב מאוחר יותר",
+        description: "אנא נסה שנית מאוחר יותר",
         variant: "destructive",
       });
     }
@@ -192,34 +211,39 @@ export default function AddSpot() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="kosher_type">רמת כשרות</Label>
-              <Select
-                value={newSpot.kosher_type}
-                onValueChange={(value: "מהדרין" | "רבנות" | "?") => 
-                  setNewSpot({ ...newSpot, kosher_type: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="בחר רמת כשרות" />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectItem value="מהדרין">מהדרין</SelectItem>
-                  <SelectItem value="רבנות">רבנות</SelectItem>
-                  <SelectItem value="?">?</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* שדות כשרות - מוצגים רק עבור מסעדות, בתי קפה וברים */}
+            {['מסעדה', 'בית קפה', 'בר'].includes(newSpot.category) && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="kosher_type">רמת כשרות</Label>
+                  <Select
+                    value={newSpot.kosher_type || "?"}
+                    onValueChange={(value: "מהדרין" | "רבנות" | "?") => 
+                      setNewSpot(prev => ({ ...prev, kosher_type: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="בחר רמת כשרות" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      <SelectItem value="מהדרין">מהדרין</SelectItem>
+                      <SelectItem value="רבנות">רבנות</SelectItem>
+                      <SelectItem value="?">לא ידוע</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="kosher_certificate">שם הכשרות</Label>
-              <Input
-                id="kosher_certificate"
-                value={newSpot.kosher_certificate}
-                onChange={(e) => setNewSpot({ ...newSpot, kosher_certificate: e.target.value })}
-                onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
-                placeholder="לדוגמה: רבנות ירושלים"
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="kosher_certificate">שם הכשרות</Label>
+                  <Input
+                    id="kosher_certificate"
+                    value={newSpot.kosher_certificate}
+                    onChange={(e) => setNewSpot({ ...newSpot, kosher_certificate: e.target.value })}
+                    onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+                    placeholder="לדוגמה: רבנות ירושלים"
+                  />
+                </div>
+              </>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="noise_level">רמת רעש</Label>

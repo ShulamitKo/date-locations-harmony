@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { KosherType } from './types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -16,14 +17,10 @@ export const getCategoryDisplay = (category: string) => {
   return categoryMap[category] || category;
 };
 
-export const getKosherTypeDisplay = (kosherType: string) => {
-  const kosherMap: { [key: string]: string } = {
-    'mehadrin': 'מהדרין',
-    'rabbanut': 'רבנות',
-    'none': 'לא כשר'
-  };
-  return kosherMap[kosherType] || kosherType;
-};
+export function getKosherTypeDisplay(kosherType: KosherType): string {
+  if (!kosherType) return '';
+  return kosherType;
+}
 
 export const getNoiseLevelDisplay = (noiseLevel: string) => {
   const noiseMap: { [key: string]: string } = {

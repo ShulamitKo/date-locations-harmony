@@ -5,23 +5,23 @@ export interface Spot {
   address: string;
   phone: string | null;
   website: string | null;
-  kosher_type: "מהדרין" | "רבנות" | "?";
+  category: "מסעדה" | "בית קפה" | "בר" | "אטרקציה" | "טבע" | "אחר";
+  kosher_type: "מהדרין" | "רבנות" | "?" | null;
   kosher_certificate: string | null;
   noise_level: "שקט" | "בינוני" | "רועש";
-  category: "מסעדה" | "בית קפה" | "בר" | "אטרקציה" | "טבע" | "אחר";
   region: "ירושלים" | "מרכז" | "צפון" | "דרום";
   price_range: "נמוך" | "בינוני" | "גבוה";
   suitable_for_first_date: boolean;
   parking_available: boolean;
   public_transport: boolean;
+  reservation_required: boolean;
   opening_hours: string | null;
   recommended_time: string | null;
-  reservation_required: boolean;
   notes: string | null;
   latitude: number;
   longitude: number;
-  average_rating: number;
   images: string[];
+  average_rating?: number;
 }
 
 export interface Review {

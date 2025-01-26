@@ -9,24 +9,7 @@ import {
 } from '@/components/ui/sheet';
 import { Filter, Coffee, Utensils, Beer, Sparkles, MapPin, DollarSign, ScrollText, Star, Trees, MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-
-type CategoryType = 'מסעדה' | 'בית קפה' | 'בר' | 'אטרקציה' | 'טבע' | 'אחר';
-type RegionType = 'ירושלים' | 'מרכז' | 'צפון' | 'דרום';
-type KosherType = 'מהדרין' | 'רבנות' | '?';
-type PriceRangeType = 'נמוך' | 'בינוני' | 'גבוה';
-
-export interface Filters {
-  search: string;
-  kosherTypes: KosherType[];
-  categories: CategoryType[];
-  regions: RegionType[];
-  priceRanges: PriceRangeType[];
-  suitableForFirstDate: boolean;
-  parkingAvailable: boolean;
-  publicTransport: boolean;
-  radius: number | null;
-  sortByDistance: boolean;
-}
+import { CategoryType, RegionType, KosherType, PriceRangeType, type Filters } from '@/lib/types';
 
 interface FilterBarProps {
   filters: Filters;
@@ -258,35 +241,37 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
             </div>
 
             {/* Kosher Types */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 font-medium">
-                <ScrollText className="h-5 w-5" />
-                כשרות
+            {filters.categories.some(cat => ['מסעדה', 'בית קפה', 'בר'].includes(cat)) && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 font-medium">
+                  <ScrollText className="h-5 w-5" />
+                  כשרות
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  <Button
+                    variant={filters.kosherTypes.includes('מהדרין') ? 'default' : 'outline'}
+                    onClick={() => toggleKosherTypeFilter('מהדרין')}
+                    className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('מהדרין') ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
+                  >
+                    מהדרין
+                  </Button>
+                  <Button
+                    variant={filters.kosherTypes.includes('רבנות') ? 'default' : 'outline'}
+                    onClick={() => toggleKosherTypeFilter('רבנות')}
+                    className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('רבנות') ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+                  >
+                    רבנות
+                  </Button>
+                  <Button
+                    variant={filters.kosherTypes.includes('?') ? 'default' : 'outline'}
+                    onClick={() => toggleKosherTypeFilter('?')}
+                    className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('?') ? 'bg-red-600 hover:bg-red-700' : ''}`}
+                  >
+                    ?
+                  </Button>
+                </div>
               </div>
-              <div className="grid grid-cols-1 gap-2">
-                <Button
-                  variant={filters.kosherTypes.includes('מהדרין') ? 'default' : 'outline'}
-                  onClick={() => toggleKosherTypeFilter('מהדרין')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('מהדרין') ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
-                >
-                  מהדרין
-                </Button>
-                <Button
-                  variant={filters.kosherTypes.includes('רבנות') ? 'default' : 'outline'}
-                  onClick={() => toggleKosherTypeFilter('רבנות')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('רבנות') ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
-                >
-                  רבנות
-                </Button>
-                <Button
-                  variant={filters.kosherTypes.includes('?') ? 'default' : 'outline'}
-                  onClick={() => toggleKosherTypeFilter('?')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('?') ? 'bg-red-600 hover:bg-red-700' : ''}`}
-                >
-                  ?
-                </Button>
-              </div>
-            </div>
+            )}
 
             {/* Additional Filters */}
             <div className="space-y-4">

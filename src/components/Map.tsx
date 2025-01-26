@@ -151,7 +151,7 @@ export default function Map({ spots = [], center = [32.0853, 34.7818], zoom = 12
         {Array.isArray(spots) && spots.map(spot => (
           spot && spot.latitude && spot.longitude ? (
             <Marker 
-              key={spot.id} 
+              key={`${spot.id || 'new'}-${spot.latitude}-${spot.longitude}`}
               position={[spot.latitude, spot.longitude]}
             >
               <Popup>
