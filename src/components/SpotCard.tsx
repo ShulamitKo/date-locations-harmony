@@ -64,7 +64,7 @@ export default function SpotCard({ spot, onClick, isSelected, distance, compact 
           </span>
         )}
         <span className={`px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full ${compact ? 'text-[10px]' : 'text-xs'}`}>
-          {'₪'.repeat(spot.price_range === 'נמוך' ? 1 : spot.price_range === 'בינוני' ? 2 : 3)}
+          {'₪'.repeat(spot.price_range === 'זול' ? 1 : spot.price_range === 'בינוני' ? 2 : 3)}
         </span>
       </div>
     </div>

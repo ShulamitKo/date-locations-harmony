@@ -11,6 +11,7 @@ import { useToast } from '@/components/ui/use-toast'
 import type { Spot } from '@/lib/supabase/types'
 import { CategoryType, RegionType, PriceRangeType, NoiseLevel, KosherType } from '@/lib/types'
 import { spotsTable } from '@/lib/supabase/config'
+import { logEvent } from '@/lib/logging'
 import Map from '@/components/Map'
 
 // טיפוס עזר שממיר שדות null לstring ריק
@@ -105,7 +106,16 @@ export default function AddSpot() {
     };
     
     try {
-      await spotsTable.create(spotToSend);
+      const newSpot = await spotsTable.create(spotToSend);
+      
+      // הוספת לוג על הוספת מקום חדש
+      await logEvent('SPOT_ADDED', {
+        spot_id: newSpot.id,
+        spot_name: newSpot.name,
+        spot_category: newSpot.category,
+        spot_region: newSpot.region
+      });
+      
       toast({
         title: "המקום נוסף בהצלחה",
         description: "המקום נוסף למאגר המקומות",
@@ -113,6 +123,14 @@ export default function AddSpot() {
       navigate('/');
     } catch (error) {
       console.error("Error creating spot:", error);
+      
+      // לוג על שגיאה בהוספת מקום
+      await logEvent('ERROR', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        action: 'create_spot',
+        spot_data: spotToSend
+      }, 'error');
+      
       toast({
         title: "שגיאה בהוספת המקום",
         description: "אנא נסה שנית מאוחר יותר",
@@ -218,8 +236,8 @@ export default function AddSpot() {
                   <Label htmlFor="kosher_type">רמת כשרות</Label>
                   <Select
                     value={newSpot.kosher_type || "?"}
-                    onValueChange={(value: "מהדרין" | "רבנות" | "?") => 
-                      setNewSpot(prev => ({ ...prev, kosher_type: value }))}
+                    onValueChange={(value: string) => 
+                      setNewSpot(prev => ({ ...prev, kosher_type: value as "מהדרין" | "רבנות" | "?" }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="בחר רמת כשרות" />
@@ -286,16 +304,16 @@ export default function AddSpot() {
               <Label htmlFor="price_range">טווח מחירים</Label>
               <Select
                 value={newSpot.price_range}
-                onValueChange={(value: "נמוך" | "בינוני" | "גבוה") => 
+                onValueChange={(value: "זול" | "בינוני" | "יקר") => 
                   setNewSpot({ ...newSpot, price_range: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="בחר טווח מחירים" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
-                  <SelectItem value="נמוך">₪ זול</SelectItem>
+                  <SelectItem value="זול">₪ זול</SelectItem>
                   <SelectItem value="בינוני">₪₪ בינוני</SelectItem>
-                  <SelectItem value="גבוה">₪₪₪ יקר</SelectItem>
+                  <SelectItem value="יקר">₪₪₪ יקר</SelectItem>
                 </SelectContent>
               </Select>
             </div>

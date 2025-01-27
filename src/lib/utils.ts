@@ -43,9 +43,9 @@ export const getRegionDisplay = (region: string) => {
 
 export const getPriceRangeDisplay = (priceRange: string) => {
   const priceMap: { [key: string]: string } = {
-    'low': '₪ זול',
-    'medium': '₪₪ בינוני',
-    'high': '₪₪₪ יקר'
+    'זול': '₪ זול',
+    'בינוני': '₪₪ בינוני',
+    'יקר': '₪₪₪ יקר'
   };
   return priceMap[priceRange] || priceRange;
 };

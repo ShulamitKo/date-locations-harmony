@@ -547,7 +547,7 @@ export default function HomePage() {
                             });
                           }}
                         >
-                          {type}
+                          {type === '?' ? 'רמת כשרות: ?' : type}
                           <X className="h-3 w-3" />
                         </Badge>
                       ))}
@@ -555,7 +555,7 @@ export default function HomePage() {
                         <Badge
                           key={price}
                           variant="outline"
-                          className="gap-1 cursor-pointer hover:bg-secondary whitespace-nowrap"
+                          className="gap-1 cursor-pointer bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200 whitespace-nowrap"
                           onClick={() => {
                             setFilters({
                               ...filters,
@@ -563,7 +563,7 @@ export default function HomePage() {
                             });
                           }}
                         >
-                          {price === 'נמוך' ? '₪ זול' :
+                          {price === 'זול' ? '₪ זול' :
                            price === 'בינוני' ? '₪₪ בינוני' : '₪₪₪ יקר'}
                           <X className="h-3 w-3" />
                         </Badge>

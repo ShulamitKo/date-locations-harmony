@@ -16,6 +16,8 @@ import { getCategoryDisplay, getKosherTypeDisplay, getNoiseLevelDisplay, getRegi
 import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import Map from '@/components/Map'
+import { logEvent } from "@/lib/logging";
+import { type KosherType } from '@/lib/types';
 
 interface ReviewForm {
   reviewer_name: string;
@@ -87,31 +89,52 @@ export default function SpotDetails() {
   }, [id]);
 
   const handleSave = async () => {
-    if (!editedSpot) return;
+    if (!editedSpot || !spot) return;
+    
+    // בדיקת תקינות המזהה
+    if (!editedSpot.id) {
+      toast({
+        title: 'שגיאה בעדכון המקום',
+        description: 'מזהה המקום חסר',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // מציאת השדות שהשתנו
+    const changedFields = Object.entries(editedSpot).reduce((acc, [key, value]) => {
+      if (spot[key as keyof Spot] !== value) {
+        acc[key as keyof Spot] = value;
+      }
+      return acc;
+    }, {} as Partial<Spot>);
+
+    // אם אין שדות שהשתנו, אין צורך לעדכן
+    if (Object.keys(changedFields).length === 0) {
+      setIsEditing(false);
+      toast({
+        title: 'לא בוצעו שינויים',
+        description: 'לא נמצאו שדות שהשתנו',
+      });
+      return;
+    }
+    
     try {
       console.log('Starting update process');
-      console.log('Original editedSpot:', JSON.stringify(editedSpot, null, 2));
-      
-      const spotToSend = {
-        ...editedSpot,
-        phone: editedSpot.phone || null,
-        website: editedSpot.website || null,
-        kosher_type: ['מסעדה', 'בית קפה', 'בר'].includes(editedSpot.category) ? editedSpot.kosher_type : null,
-        kosher_certificate: ['מסעדה', 'בית קפה', 'בר'].includes(editedSpot.category) ? (editedSpot.kosher_certificate || null) : null,
-        opening_hours: editedSpot.opening_hours || null,
-        recommended_time: editedSpot.recommended_time || null,
-        notes: editedSpot.notes || null
-      };
-
-      console.log('Prepared spotToSend:', JSON.stringify(spotToSend, null, 2));
+      console.log('Original spot:', spot);
+      console.log('Edited spot:', editedSpot);
+      console.log('Changed fields:', changedFields);
       console.log('Spot ID:', editedSpot.id);
       
-      const updatedSpot = await spotsTable.update(editedSpot.id, spotToSend);
-      console.log('Response from server:', JSON.stringify(updatedSpot, null, 2));
+      const updatedSpot = await spotsTable.update(editedSpot.id, changedFields);
       
-      if (!updatedSpot) {
-        throw new Error('לא התקבל מידע מהשרת אחרי העדכון');
-      }
+      // לוג על עדכון מקום
+      await logEvent('SPOT_EDITED', {
+        spot_id: updatedSpot.id,
+        spot_name: updatedSpot.name,
+        spot_category: updatedSpot.category,
+        spot_region: updatedSpot.region
+      });
 
       // עדכון מיידי של המצב המקומי
       setSpot(updatedSpot);
@@ -125,6 +148,15 @@ export default function SpotDetails() {
     } catch (error) {
       console.error('Error details:', error);
       console.error('Full error object:', JSON.stringify(error, null, 2));
+
+      // לוג על שגיאה בעדכון מקום
+      await logEvent('ERROR', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        action: 'update_spot',
+        spot_id: editedSpot.id,
+        spot_data: changedFields
+      }, 'error');
+      
       toast({
         title: 'שגיאה בעדכון המקום',
         description: error instanceof Error ? error.message : 'אנא נסה שוב מאוחר יותר',
@@ -272,19 +304,26 @@ export default function SpotDetails() {
                     {['מסעדה', 'בית קפה', 'בר'].includes(editedSpot?.category || '') && (
                       <>
                         <div className="space-y-2">
-                          <Label htmlFor="kosher_type">רמת כשרות</Label>
+                          <Label htmlFor="kosher_type">כשרות</Label>
                           <Select
-                            value={editedSpot?.kosher_type || "?"}
-                            onValueChange={(value: "מהדרין" | "רבנות" | "?") => 
-                              setEditedSpot(prev => prev ? { ...prev, kosher_type: value } : null)}
+                            value={editedSpot?.kosher_type || '?'}
+                            onValueChange={(value: string) => {
+                              setEditedSpot(prev => {
+                                if (!prev) return null;
+                                return {
+                                  ...prev,
+                                  kosher_type: value as KosherType
+                                };
+                              });
+                            }}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder="בחר רמת כשרות" />
+                              <SelectValue placeholder="בחר סוג כשרות" />
                             </SelectTrigger>
                             <SelectContent className="bg-white">
                               <SelectItem value="מהדרין">מהדרין</SelectItem>
                               <SelectItem value="רבנות">רבנות</SelectItem>
-                              <SelectItem value="?">?</SelectItem>
+                              <SelectItem value="?">לא ידוע</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -342,16 +381,16 @@ export default function SpotDetails() {
                       <Label htmlFor="price_range">טווח מחירים</Label>
                       <Select
                         value={editedSpot?.price_range}
-                        onValueChange={(value: "נמוך" | "בינוני" | "גבוה") => 
+                        onValueChange={(value: "זול" | "בינוני" | "יקר") => 
                           setEditedSpot(prev => prev ? { ...prev, price_range: value } : null)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="בחר טווח מחירים" />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
-                          <SelectItem value="נמוך">₪ זול</SelectItem>
+                          <SelectItem value="זול">₪ זול</SelectItem>
                           <SelectItem value="בינוני">₪₪ בינוני</SelectItem>
-                          <SelectItem value="גבוה">₪₪₪ יקר</SelectItem>
+                          <SelectItem value="יקר">₪₪₪ יקר</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -478,8 +517,8 @@ export default function SpotDetails() {
                         </div>
                       )}
 
-                      {/* תגית מחיר - צבע כתום */}
-                      <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300 hover:bg-orange-200">
+                      {/* תגית מחיר */}
+                      <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200">
                         <div className="flex items-center gap-1">
                           <CircleDollarSign className="h-4 w-4" />
                           רמת מחיר: {getPriceRangeDisplay(spot.price_range)}

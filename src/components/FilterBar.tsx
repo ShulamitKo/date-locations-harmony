@@ -217,23 +217,35 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
               </div>
               <div className="grid grid-cols-1 gap-2">
                 <Button
-                  variant={filters.priceRanges.includes('נמוך') ? 'default' : 'outline'}
-                  onClick={() => togglePriceRangeFilter('נמוך')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.priceRanges.includes('נמוך') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.priceRanges.includes('זול') ? 'default' : 'outline'}
+                  onClick={() => togglePriceRangeFilter('זול')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${
+                    filters.priceRanges.includes('זול') 
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600' 
+                      : 'hover:bg-emerald-100 hover:text-emerald-800 hover:border-emerald-300'
+                  }`}
                 >
                   ₪ זול
                 </Button>
                 <Button
                   variant={filters.priceRanges.includes('בינוני') ? 'default' : 'outline'}
                   onClick={() => togglePriceRangeFilter('בינוני')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.priceRanges.includes('בינוני') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${
+                    filters.priceRanges.includes('בינוני') 
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600' 
+                      : 'hover:bg-emerald-100 hover:text-emerald-800 hover:border-emerald-300'
+                  }`}
                 >
                   ₪₪ בינוני
                 </Button>
                 <Button
-                  variant={filters.priceRanges.includes('גבוה') ? 'default' : 'outline'}
-                  onClick={() => togglePriceRangeFilter('גבוה')}
-                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.priceRanges.includes('גבוה') ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+                  variant={filters.priceRanges.includes('יקר') ? 'default' : 'outline'}
+                  onClick={() => togglePriceRangeFilter('יקר')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${
+                    filters.priceRanges.includes('יקר') 
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600' 
+                      : 'hover:bg-emerald-100 hover:text-emerald-800 hover:border-emerald-300'
+                  }`}
                 >
                   ₪₪₪ יקר
                 </Button>
@@ -267,7 +279,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
                     onClick={() => toggleKosherTypeFilter('?')}
                     className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${filters.kosherTypes.includes('?') ? 'bg-red-600 hover:bg-red-700' : ''}`}
                   >
-                    ?
+                    לא ידוע
                   </Button>
                 </div>
               </div>

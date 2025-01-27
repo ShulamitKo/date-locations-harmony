@@ -10,7 +10,7 @@ export interface Spot {
   kosher_certificate: string | null;
   noise_level: "שקט" | "בינוני" | "רועש";
   region: "ירושלים" | "מרכז" | "צפון" | "דרום";
-  price_range: "נמוך" | "בינוני" | "גבוה";
+  price_range: "זול" | "בינוני" | "יקר";
   suitable_for_first_date: boolean;
   parking_available: boolean;
   public_transport: boolean;

@@ -62,34 +62,66 @@ export const spotsTable = {
   },
 
   async update(id: string, spot: Partial<Spot>) {
+    console.log('Attempting to update spot with ID:', id);
+    console.log('Update data:', spot);
+
+    // בדיקה אם המקום קיים
+    const { data: existingSpot, error: checkError } = await supabase
+      .from('spots')
+      .select()
+      .eq('id', id)
+      .single();
+
+    if (checkError) {
+      console.error('Error checking spot:', checkError);
+      throw checkError;
+    }
+
+    if (!existingSpot) {
+      throw new Error('המקום לא נמצא במערכת');
+    }
+
+    // הכנת הנתונים לעדכון
+    const updateData = { ...spot };
+
+    // אם מעדכנים קטגוריה, צריך לטפל בכשרות בהתאם
+    if (updateData.category) {
+      if (['בית קפה', 'מסעדה', 'בר'].includes(updateData.category)) {
+        // אם זה מקום אוכל, חייב להיות ערך כשרות
+        updateData.kosher_type = updateData.kosher_type || '?';
+      } else {
+        // אם זה לא מקום אוכל, חייב להיות null
+        updateData.kosher_type = null;
+      }
+    } else if (['בית קפה', 'מסעדה', 'בר'].includes(existingSpot.category)) {
+      // אם לא מעדכנים קטגוריה וזה מקום אוכל, וודא שיש ערך כשרות
+      updateData.kosher_type = updateData.kosher_type || existingSpot.kosher_type || '?';
+    }
+
+    console.log('Final update data:', updateData);
+
+    // עדכון המקום
     const { data, error } = await supabase
       .from('spots')
-      .update({
-        name: spot.name,
-        address: spot.address,
-        phone: spot.phone,
-        website: spot.website,
-        kosher_type: spot.kosher_type,
-        kosher_certificate: spot.kosher_certificate,
-        noise_level: spot.noise_level,
-        category: spot.category,
-        region: spot.region,
-        price_range: spot.price_range,
-        suitable_for_first_date: spot.suitable_for_first_date,
-        parking_available: spot.parking_available,
-        public_transport: spot.public_transport,
-        opening_hours: spot.opening_hours,
-        recommended_time: spot.recommended_time,
-        reservation_required: spot.reservation_required,
-        notes: spot.notes,
-        latitude: spot.latitude,
-        longitude: spot.longitude
-      })
+      .update(updateData)
       .eq('id', id)
-      .select()
-      .single()
-    if (error) throw error
-    return data as Spot
+      .select();
+
+    if (error) {
+      console.error('Error updating spot:', error);
+      console.error('Error details:', error.details);
+      console.error('Error hint:', error.hint);
+      console.error('Error message:', error.message);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      console.error('No data returned after update');
+      throw new Error('העדכון נכשל - לא התקבל מידע מהשרת');
+    }
+
+    console.log('Update successful, returned data:', data[0]);
+    return data[0] as Spot;
   },
 
   async delete(id: string) {
