@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Spot, Review } from './types'
+import type { Spot, Review, Report } from './types'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -130,6 +130,18 @@ export const spotsTable = {
       .delete()
       .eq('id', id)
     if (error) throw error
+  },
+
+  async updateStatus(id: string, status: Spot['status']) {
+    const { data: spot, error } = await supabase
+      .from('spots')
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return spot;
   }
 }
 
@@ -160,4 +172,91 @@ export const reviewsTable = {
     if (error) throw error
     return data as Review
   }
-} 
+}
+
+export const reportsTable = {
+  async getAll() {
+    const { data: reports, error } = await supabase
+      .from('reports')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return reports;
+  },
+
+  async create(data: Omit<Report, 'id' | 'created_at' | 'updated_at' | 'status'>) {
+    const { data: report, error } = await supabase
+      .from('reports')
+      .insert({
+        ...data,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return report;
+  },
+
+  async getById(id: string) {
+    const { data: report, error } = await supabase
+      .from('reports')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return report;
+  },
+
+  async getBySpotId(spotId: string) {
+    const { data: reports, error } = await supabase
+      .from('reports')
+      .select('*')
+      .eq('spot_id', spotId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return reports;
+  },
+
+  async updateStatus(id: string, status: Report['status'], adminNotes?: string) {
+    const { data: report, error } = await supabase
+      .from('reports')
+      .update({
+        status,
+        admin_notes: adminNotes,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return report;
+  },
+
+  async getOpenReportsCount(spotId: string) {
+    const { count, error } = await supabase
+      .from('reports')
+      .select('*', { count: 'exact', head: true })
+      .eq('spot_id', spotId)
+      .in('status', ['pending', 'in_review']);
+
+    if (error) throw error;
+    return { count: count || 0 };
+  }
+};
+
+export const adminTable = {
+  async checkAccess() {
+    const { data, error } = await supabase
+      .rpc('check_admin_access');
+    
+    if (error) throw error;
+    return data as boolean;
+  }
+}; 

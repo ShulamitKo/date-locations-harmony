@@ -18,6 +18,7 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import Map from '@/components/Map'
 import { logEvent } from "@/lib/logging";
 import { type KosherType } from '@/lib/types';
+import { ReportButton } from '@/components/ReportButton';
 
 interface ReviewForm {
   reviewer_name: string;
@@ -201,6 +202,16 @@ export default function SpotDetails() {
     }
   };
 
+  const loadSpot = async () => {
+    try {
+      const spotData = await spotsTable.getById(id!);
+      setSpot(spotData);
+    } catch (error) {
+      console.error('Error loading spot:', error);
+      setError(error as Error);
+    }
+  };
+
   if (isLoading) return <div className="container mx-auto py-8 text-center">טוען...</div>;
   if (error) return <div className="container mx-auto py-8 text-center text-red-500">שגיאה בטעינת הפרטים</div>;
   if (!spot) return null;
@@ -208,8 +219,26 @@ export default function SpotDetails() {
   return (
     <div className="spot-details-container">
       <div className="container mx-auto p-4">
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-bold">{spot.name}</h1>
+            {spot.status === 'under_review' && (
+              <Badge 
+                variant="outline" 
+                className="bg-yellow-100 text-yellow-800 border-yellow-300 text-sm py-1 px-2"
+              >
+                מקום זה נמצא בבדיקת מנהלים
+              </Badge>
+            )}
+          </div>
+          <ReportButton 
+            spotId={spot.id} 
+            spotName={spot.name}
+            className="mt-1"
+            onReportSubmitted={loadSpot}
+          />
+        </div>
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold">{spot.name}</h1>
           <div className="flex gap-2">
             {isEditing ? (
               <>

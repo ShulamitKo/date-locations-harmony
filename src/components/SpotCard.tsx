@@ -1,5 +1,6 @@
-import {  Coffee, Utensils, Beer, Sparkles, MoreHorizontal, Trees } from "lucide-react";
+import { Coffee, Utensils, Beer, Sparkles, MoreHorizontal, Trees } from "lucide-react";
 import type { Spot } from "@/lib/supabase/types";
+import { Badge } from "@/components/ui/badge";
 
 const categoryIcons = {
   'בית קפה': Coffee,
@@ -18,7 +19,7 @@ interface SpotCardProps {
   compact?: boolean;
 }
 
-export default function SpotCard({ spot, onClick, isSelected, distance, compact }: SpotCardProps) {
+export function SpotCard({ spot, onClick, isSelected, distance, compact }: SpotCardProps) {
   const CategoryIcon = categoryIcons[spot.category];
 
   return (
@@ -26,7 +27,7 @@ export default function SpotCard({ spot, onClick, isSelected, distance, compact 
       id={`spot-${spot.id}`}
       tabIndex={0}
       className={`
-        bg-white rounded-lg shadow-sm transition-all duration-300
+        relative bg-white rounded-lg shadow-sm transition-all duration-300
         ${onClick ? 'cursor-pointer hover:shadow-md' : ''}
         ${isSelected ? 'ring-2 ring-primary ring-offset-2' : ''}
         ${compact ? 'p-3' : 'p-4'}
@@ -34,6 +35,15 @@ export default function SpotCard({ spot, onClick, isSelected, distance, compact 
       `}
       onClick={onClick}
     >
+      {spot.status === 'under_review' && (
+        <Badge 
+          variant="outline" 
+          className="absolute top-1 left-1 text-[10px] py-0 px-1.5 bg-yellow-50 text-yellow-800 border-yellow-200 z-10"
+        >
+          בבדיקת מנהלים
+        </Badge>
+      )}
+
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <CategoryIcon className={`${compact ? 'w-4 h-4' : 'w-5 h-5'} text-primary`} />

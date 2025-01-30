@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Coffee, Utensils, Beer, Sparkles, MoreHorizontal, Trees, ArrowUpDown, MapPin, List, Map, X, ScrollText, FileText, RotateCcw, Search } from "lucide-react";
 import type { Spot } from "@/lib/supabase/types";
 import { spotsTable } from "@/lib/supabase/config";
-import SpotCard from "@/components/SpotCard";
+import { SpotCard } from '@/components/SpotCard';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
@@ -15,6 +15,7 @@ import { FilterBar } from "@/components/FilterBar";
 import { AboutDialog } from "@/components/AboutDialog";
 import { TermsDialog } from "@/components/TermsDialog";
 import { type Filters } from '@/lib/types';
+import { ReportButton } from "@/components/ReportButton";
 
 // Custom icons for different categories
 const categoryIcons = {
@@ -326,6 +327,17 @@ export default function HomePage() {
     }
   };
 
+  // העברת loadSpots לפונקציה רגילה שתהיה זמינה בכל הקומפוננטה
+  const refreshSpots = async () => {
+    try {
+      const allSpots = await spotsTable.getAll();
+      setSpots(allSpots);
+    } catch (error) {
+      console.error("Error loading spots:", error);
+      setError(error as Error);
+    }
+  };
+
   if (isLoading) return <div className="container mx-auto py-8 text-center">טוען...</div>;
   if (error) return <div className="container mx-auto py-8 text-center text-red-500">שגיאה בטעינת המקומות</div>;
 
@@ -630,28 +642,12 @@ export default function HomePage() {
                     ${viewMode === 'map' ? 'sm:grid sm:h-auto' : ''}
                   `}>
                     {filteredSpots.map((spot) => (
-                      <div 
-                        key={spot.id}
-                        className={viewMode === 'map' ? 'flex-shrink-0 w-[200px] sm:w-auto' : ''}
-                      >
+                      <div key={spot.id} className="relative">
                         <SpotCard
                           spot={spot}
-                          onClick={() => {
-                            if (window.innerWidth <= 768) {
-                              // במובייל - ההתנהגות תלויה בסוג התצוגה
-                              if (viewMode === 'map') {
-                                handleSpotClick(spot);
-                              } else {
-                                navigate(`/spot/${spot.id}`);
-                              }
-                            } else {
-                              // בדסקטופ - תמיד נתמקד במיקום
-                              handleSpotClick(spot);
-                            }
-                          }}
+                          onClick={() => handleSpotClick(spot)}
                           isSelected={selectedSpot === spot.id}
-                          distance={formatDistance(calculateDistance(spot))}
-                          compact={viewMode === 'map'}
+                          distance={userLocation ? formatDistance(calculateDistance(spot)) : null}
                         />
                       </div>
                     ))}
