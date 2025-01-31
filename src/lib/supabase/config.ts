@@ -237,17 +237,6 @@ export const reportsTable = {
 
     if (error) throw error;
     return report;
-  },
-
-  async getOpenReportsCount(spotId: string) {
-    const { count, error } = await supabase
-      .from('reports')
-      .select('*', { count: 'exact', head: true })
-      .eq('spot_id', spotId)
-      .in('status', ['pending', 'in_review']);
-
-    if (error) throw error;
-    return { count: count || 0 };
   }
 };
 

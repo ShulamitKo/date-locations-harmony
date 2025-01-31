@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { Flag, Loader2 } from 'lucide-react';
-import { reportsTable } from '@/lib/supabase/config';
+import { reportsTable, spotsTable } from '@/lib/supabase/config';
 import { EMAIL_STYLES } from './email-styles';
 
 const REPORT_TYPES = [
@@ -33,6 +33,27 @@ export function ReportButton({ spotId, spotName, className, onReportSubmitted }:
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const sendEmail = async (formData: Record<string, string>) => {
+    const tempForm = document.createElement('form');
+    tempForm.method = 'POST';
+    tempForm.action = 'https://formsubmit.co/a09aea30b021efbcf8b44ca97295d15f';
+    tempForm.target = 'submitFrame';
+
+    // הוספת השדות לטופס
+    Object.entries(formData).forEach(([key, value]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = value.toString();
+      tempForm.appendChild(input);
+    });
+
+    // שליחת הטופס
+    document.body.appendChild(tempForm);
+    tempForm.submit();
+    document.body.removeChild(tempForm);
+  };
+
   const handleSubmit = async () => {
     if (!reportType) {
       toast({
@@ -58,19 +79,9 @@ export function ReportButton({ spotId, spotName, className, onReportSubmitted }:
         reporter_ip: userIp
       });
 
-      // בדיקת מספר הדיווחים הפתוחים למקום זה
-      const { count } = await reportsTable.getOpenReportsCount(spotId);
-      const isUnderReview = count >= 3;
-
-      // שליחת מייל באמצעות FormSubmit
-      const tempForm = document.createElement('form');
-      tempForm.method = 'POST';
-      tempForm.action = 'https://formsubmit.co/a09aea30b021efbcf8b44ca97295d15f';
-      tempForm.target = 'submitFrame';
-
-      // הוספת שדות נסתרים לעיצוב והגדרות
-      const hiddenFields = {
-        '_subject': `דיווח חדש על המקום: ${spotName}${isUnderReview ? ' - עבר לסטטוס בדיקה!' : ''}`,
+      // שליחת מייל על הדיווח החדש
+      await sendEmail({
+        '_subject': `דיווח חדש על המקום: ${spotName}`,
         '_template': 'box',
         '_captcha': 'false',
         '_style': EMAIL_STYLES,
@@ -78,31 +89,38 @@ export function ReportButton({ spotId, spotName, className, onReportSubmitted }:
         'סוג דיווח': reportType,
         'תיאור': description,
         'IP המדווח': userIp,
-        'מזהה דיווח': report.id,
-        'סטטוס': isUnderReview ? '⚠️ המקום עבר לסטטוס בדיקה!' : 'ממתין לבדיקה',
-        'קישור לניהול': 'https://datespots.co.il/admin/reports',
-        'מספר דיווחים פתוחים': count.toString()
-      };
-
-      // הוספת השדות לטופס
-      Object.entries(hiddenFields).forEach(([key, value]) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = value.toString();
-        tempForm.appendChild(input);
+        'מזהה דיווח': report.id
       });
 
-      // הוספת iframe נסתר
-      const iframe = document.createElement('iframe');
-      iframe.name = 'submitFrame';
-      iframe.style.display = 'none';
-      document.body.appendChild(iframe);
+      // בדיקת כמות הדיווחים הפתוחים למקום
+      const reports = await reportsTable.getBySpotId(spotId);
+      const openReports = reports.filter(r => r.status === 'pending' || r.status === 'in_review');
 
-      // שליחת הטופס
-      document.body.appendChild(tempForm);
-      tempForm.submit();
-      document.body.removeChild(tempForm);
+      // אם יש 3 דיווחים או יותר, שליחת מייל נוסף
+      if (openReports.length >= 3) {
+        const spot = await spotsTable.getById(spotId);
+        
+        // שליחת מייל על מעבר לסטטוס בדיקת מנהלים
+        await sendEmail({
+          '_subject': `⚠️ התראה: מקום עבר לסטטוס בדיקת מנהלים: ${spotName}`,
+          '_template': 'box',
+          '_captcha': 'false',
+          '_style': EMAIL_STYLES,
+          'שם המקום': spotName,
+          'כתובת': spot.address,
+          'קטגוריה': spot.category,
+          'כמות דיווחים פתוחים': openReports.length.toString(),
+          'דיווחים ממתינים': reports.filter(r => r.status === 'pending').length.toString(),
+          'דיווחים בבדיקה': reports.filter(r => r.status === 'in_review').length.toString(),
+          //'קישור למערכת': window.location.origin + '/admin/reports',
+          'פירוט הדיווחים': openReports.map(r => `
+            סוג: ${r.report_type}
+            תיאור: ${r.description}
+            סטטוס: ${r.status}
+            תאריך: ${new Date(r.created_at).toLocaleDateString('he-IL')}
+          `).join('\n')
+        });
+      }
 
       toast({
         title: "תודה על הדיווח",
