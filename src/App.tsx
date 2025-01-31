@@ -13,9 +13,6 @@ import AdminReports from "./pages/AdminReports";
 import { useState, useEffect } from "react";
 import { adminTable } from "@/lib/supabase/config";
 
-// רשימת IP-ים מורשים - חייב להיות זהה לרשימה בדף AdminReports
-const ALLOWED_IPS = ['YOUR_IP_HERE'];
-
 // קומפוננטת הגנה
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthorized, setIsAuthorized] = useState(false);
