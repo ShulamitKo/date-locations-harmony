@@ -1,0 +1,15 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- רקע -->
+  <rect width="1200" height="630" fill="#FF4B91"/>
+  
+  <!-- לוגו -->
+  <g transform="translate(100, 165) scale(0.6)">
+    <circle cx="256" cy="256" r="256" fill="white"/>
+    <path d="M372 164C354.5 164 338.5 171 326 183.5C313.5 171 297.5 164 280 164C244.5 164 216 192.5 216 228C216 272.5 259.5 308.5 326 368C392.5 308.5 436 272.5 436 228C436 192.5 407.5 164 372 164Z" fill="#FF4B91"/>
+    <path d="M186 144C141.5 144 106 179.5 106 224C106 280.5 186 368 186 368C186 368 266 280.5 266 224C266 179.5 230.5 144 186 144ZM186 254C169.5 254 156 240.5 156 224C156 207.5 169.5 194 186 194C202.5 194 216 207.5 216 224C216 240.5 202.5 254 186 254Z" fill="#FF4B91"/>
+  </g>
+  
+  <!-- טקסט -->
+  <text x="450" y="250" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="white">DateSpots</text>
+  <text x="450" y="350" font-family="Arial, sans-serif" font-size="40" fill="white">מצאו את המקום המושלם לדייט הבא שלכם</text>
+</svg> 
