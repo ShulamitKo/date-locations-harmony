@@ -49,7 +49,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/spot/:id" element={<SpotDetails />} />
-          <Route path="/add" element={<AddSpot />} />
+          <Route path="/add-spot" element={<AddSpot />} />
           <Route path="/admin" element={<Admin />} />
           <Route 
             path="/admin/reports" 
