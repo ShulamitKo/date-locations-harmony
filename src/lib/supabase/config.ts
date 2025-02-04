@@ -242,10 +242,30 @@ export const reportsTable = {
 
 export const adminTable = {
   async checkAccess() {
-    const { data, error } = await supabase
-      .rpc('check_admin_access');
+    console.log('מתחיל בדיקת הרשאות בסופאבייס...');
     
-    if (error) throw error;
-    return data as boolean;
+    try {
+      const response = await fetch('https://api.ipify.org?format=json');
+      const ipData = await response.json();
+      console.log('ה-IP שלנו:', ipData.ip);
+      
+      // קריאה ל-RPC עם ה-IP כפרמטר
+      const { data, error } = await supabase
+        .rpc('check_admin_access', {
+          client_ip: ipData.ip
+        });
+      
+      if (error) {
+        console.error('שגיאה בקריאה ל-RPC:', error);
+        throw error;
+      }
+      
+      console.log('תשובה מסופאבייס:', data);
+      return data as boolean;
+      
+    } catch (error) {
+      console.error('שגיאה בתהליך בדיקת ההרשאות:', error);
+      return false;
+    }
   }
 }; 

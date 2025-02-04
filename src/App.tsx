@@ -21,10 +21,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log('בודק הרשאות...');
         const hasAccess = await adminTable.checkAccess();
+        console.log('תוצאת בדיקת הרשאות:', hasAccess);
         setIsAuthorized(hasAccess);
       } catch (error) {
-        console.error('Error checking access:', error);
+        console.error('שגיאה בבדיקת הרשאות:', error);
         setIsAuthorized(false);
       } finally {
         setIsChecking(false);
@@ -34,7 +36,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     checkAuth();
   }, []);
 
-  if (isChecking) return null;
+  if (isChecking) {
+    console.log('בודק...');
+    return null;
+  }
+  
+  console.log('סטטוס הרשאות:', isAuthorized);
   return isAuthorized ? <>{children}</> : <Navigate to="/" replace />;
 };
 
