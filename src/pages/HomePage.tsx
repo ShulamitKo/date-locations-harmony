@@ -629,25 +629,34 @@ export default function HomePage() {
             <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
               {/* List View */}
               <div className={`
-                ${viewMode === 'map' ? 'absolute bottom-4 left-0 right-0 z-[900] h-32 bg-transparent backdrop-blur-none' : 'h-full overflow-y-auto pb-32 sm:pb-0'}
+                ${viewMode === 'map' ? 'absolute bottom-10 left-0 right-0 z-[900] h-36 bg-transparent' : 'h-full overflow-y-auto pb-32 sm:pb-0'}
                 ${viewMode === 'list' ? 'block' : viewMode === 'map' ? 'block' : 'hidden'}
-                sm:relative sm:block sm:w-[400px] sm:flex-none sm:border-l sm:h-auto sm:shadow-none sm:bg-white sm:backdrop-blur-none
+                sm:relative sm:block sm:w-[400px] sm:flex-none sm:border-l sm:h-auto sm:shadow-none sm:bg-white
               `}>
                 <div className={`
-                  ${viewMode === 'map' ? 'h-full overflow-x-auto overflow-y-hidden' : ''}
-                  ${viewMode === 'map' ? 'px-4 pb-4' : 'container mx-auto p-4'}
+                  ${viewMode === 'map' ? 'h-full overflow-x-auto overflow-y-hidden px-2 pb-3' : 'container mx-auto p-4'}
                 `}>
                   <div className={`
-                    ${viewMode === 'map' ? 'flex gap-4 h-full py-2' : 'grid gap-4'}
-                    ${viewMode === 'map' ? 'sm:grid sm:h-auto' : ''}
+                    ${viewMode === 'map' ? 'flex gap-2 h-full py-2' : 'grid gap-4'}
+                    ${viewMode === 'map' ? 'sm:grid sm:h-auto sm:gap-4 sm:py-2' : ''}
                   `}>
                     {filteredSpots.map((spot) => (
-                      <div key={spot.id} className="relative">
+                      <div key={spot.id} className={`
+                        relative
+                        ${viewMode === 'map' ? 'min-w-[200px] sm:min-w-0' : ''}
+                      `}>
                         <SpotCard
                           spot={spot}
-                          onClick={() => handleSpotClick(spot)}
+                          onClick={() => {
+                            if (viewMode === 'list' && window.innerWidth < 640) {
+                              navigate(`/spot/${spot.id}`);
+                            } else {
+                              handleSpotClick(spot);
+                            }
+                          }}
                           isSelected={selectedSpot === spot.id}
                           distance={userLocation ? formatDistance(calculateDistance(spot)) : null}
+                          compact={viewMode === 'map'}
                         />
                       </div>
                     ))}
