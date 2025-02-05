@@ -19,6 +19,8 @@ import Map from '@/components/Map'
 import { logEvent } from "@/lib/logging";
 import { type KosherType } from '@/lib/types';
 import { ReportButton } from '@/components/ReportButton';
+import { checkRateLimit } from '@/lib/rateLimit';
+import { useUserIp } from '@/lib/hooks/useUserIp';
 
 interface ReviewForm {
   reviewer_name: string;
@@ -67,6 +69,7 @@ export default function SpotDetails() {
     content: '',
     visit_date: ''
   });
+  const { userIp } = useUserIp();
 
   useEffect(() => {
     const loadSpotAndReviews = async () => {
@@ -91,6 +94,26 @@ export default function SpotDetails() {
 
   const handleSave = async () => {
     if (!editedSpot || !spot) return;
+    
+    // בדיקת מגבלת קצב
+    if (!userIp) {
+      toast({
+        title: 'שגיאה בעדכון המקום',
+        description: 'לא ניתן לזהות את כתובת ה-IP שלך',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const rateLimitCheck = await checkRateLimit('editSpot', userIp);
+    if (!rateLimitCheck.allowed) {
+      toast({
+        title: 'לא ניתן לערוך מקום כרגע',
+        description: 'נסה שוב מאוחר יותר',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     // בדיקת תקינות המזהה
     if (!editedSpot.id) {
@@ -169,6 +192,26 @@ export default function SpotDetails() {
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!spot || !reviewForm) return;
+
+    // בדיקת מגבלת קצב
+    if (!userIp) {
+      toast({
+        title: 'שגיאה בהוספת הביקורת',
+        description: 'לא ניתן לזהות את כתובת ה-IP שלך',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const rateLimitCheck = await checkRateLimit('review', userIp);
+    if (!rateLimitCheck.allowed) {
+      toast({
+        title: 'לא ניתן להוסיף ביקורת כרגע',
+        description: 'נסה שוב מאוחר יותר',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     try {
       const newReview = await reviewsTable.create({

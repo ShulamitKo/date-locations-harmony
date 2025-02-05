@@ -13,6 +13,8 @@ import { CategoryType, RegionType, PriceRangeType, NoiseLevel, KosherType } from
 import { spotsTable } from '@/lib/supabase/config'
 import { logEvent } from '@/lib/logging'
 import Map from '@/components/Map'
+import { checkRateLimit } from '@/lib/rateLimit'
+import { useUserIp } from '@/lib/hooks/useUserIp'
 
 // טיפוס עזר שממיר שדות null לstring ריק
 type FormSpot = {
@@ -41,6 +43,7 @@ type FormSpot = {
 export default function AddSpot() {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { userIp } = useUserIp()
   
   const [newSpot, setNewSpot] = useState<FormSpot>({
     name: "",
@@ -83,6 +86,26 @@ export default function AddSpot() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // בדיקת מגבלת קצב
+    if (!userIp) {
+      toast({
+        title: "שגיאה בהוספת המקום",
+        description: "לא ניתן לזהות את כתובת ה-IP שלך",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const rateLimitCheck = await checkRateLimit('addSpot', userIp);
+    if (!rateLimitCheck.allowed) {
+      toast({
+        title: "לא ניתן להוסיף מקום כרגע",
+        description: "נסה שוב מאוחר יותר",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Check if location is selected (not default coordinates)
     if (newSpot.latitude === 32.0853 && newSpot.longitude === 34.7818) {
       toast({
@@ -96,6 +119,7 @@ export default function AddSpot() {
     // Convert empty strings to null before sending to the server
     const spotToSend: Omit<Spot, 'id' | 'created_at' | 'average_rating'> = {
       ...newSpot,
+      status: 'under_review',
       phone: newSpot.phone || null,
       website: newSpot.website || null,
       kosher_type: ['מסעדה', 'בית קפה', 'בר'].includes(newSpot.category) ? newSpot.kosher_type : null,

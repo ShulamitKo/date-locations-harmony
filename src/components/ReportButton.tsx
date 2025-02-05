@@ -8,6 +8,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { Flag, Loader2 } from 'lucide-react';
 import { reportsTable, spotsTable } from '@/lib/supabase/config';
 import { EMAIL_STYLES } from './email-styles';
+import { checkRateLimit } from '@/lib/rateLimit';
+import { useUserIp } from '@/lib/hooks/useUserIp';
 
 const REPORT_TYPES = [
   { value: 'spam', label: 'תוכן זבל/ספאם' },
@@ -32,6 +34,7 @@ export function ReportButton({ spotId, spotName, className, onReportSubmitted }:
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { userIp } = useUserIp();
 
   const sendEmail = async (formData: Record<string, string>) => {
     const tempForm = document.createElement('form');
@@ -64,13 +67,28 @@ export function ReportButton({ spotId, spotName, className, onReportSubmitted }:
       return;
     }
 
+    if (!userIp) {
+      toast({
+        title: "שגיאה בשליחת הדיווח",
+        description: "לא ניתן לזהות את כתובת ה-IP שלך",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // בדיקת מגבלת קצב
+    const rateLimitCheck = await checkRateLimit('report', userIp);
+    if (!rateLimitCheck.allowed) {
+      toast({
+        title: "לא ניתן לשלוח דיווח כרגע",
+        description: "נסה שוב מאוחר יותר",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
-
-      // קבלת IP של המשתמש
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      const userIp = data.ip;
 
       const report = await reportsTable.create({
         spot_id: spotId,

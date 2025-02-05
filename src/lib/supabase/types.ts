@@ -52,4 +52,11 @@ export type Report = {
   created_at: string;
   admin_notes?: string;
   spot?: Spot;
-}; 
+};
+
+export interface RateLimit {
+  key: string;
+  attempts: number;
+  expires_at: string;
+  created_at?: string;
+} 

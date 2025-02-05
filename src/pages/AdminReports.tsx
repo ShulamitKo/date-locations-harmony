@@ -10,7 +10,7 @@ import type { Report, Spot } from '@/lib/supabase/types';
 import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 // רשימת IP-ים מורשים
-const ALLOWED_IPS = ['YOUR_IP_HERE']; // החלף עם ה-IP שלך
+//const ALLOWED_IPS = ['YOUR_IP_HERE']; // החלף עם ה-IP שלך
 
 type ReportWithSpot = Report & { spot: Spot | null };
 

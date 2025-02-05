@@ -12,6 +12,7 @@ import Footer from '@/components/Footer'
 import AdminReports from "./pages/AdminReports";
 import { useState, useEffect } from "react";
 import { adminTable } from "@/lib/supabase/config";
+import { cleanupExpiredRateLimits } from "@/lib/rateLimit";
 
 // קומפוננטת הגנה
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -47,31 +48,46 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/spot/:id" element={<SpotDetails />} />
-          <Route path="/add-spot" element={<AddSpot />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route 
-            path="/admin/reports" 
-            element={
-              <ProtectedRoute>
-                <AdminReports />
-              </ProtectedRoute>
-            } 
-          />
-        </Routes>
-        <Footer />
-      </BrowserRouter>
-      <Analytics />
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // ניקוי אוטומטי של רשומות ישנות
+  useEffect(() => {
+    // ניקוי ראשוני
+    cleanupExpiredRateLimits();
+
+    // ניקוי כל שעה
+    const cleanup = setInterval(() => {
+      cleanupExpiredRateLimits();
+    }, 60 * 60 * 1000); // שעה במילישניות
+
+    return () => clearInterval(cleanup);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/spot/:id" element={<SpotDetails />} />
+            <Route path="/add-spot" element={<AddSpot />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route 
+              path="/admin/reports" 
+              element={
+                <ProtectedRoute>
+                  <AdminReports />
+                </ProtectedRoute>
+              } 
+            />
+          </Routes>
+          <Footer />
+        </BrowserRouter>
+        <Analytics />
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
