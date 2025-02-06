@@ -23,7 +23,7 @@ export const validateSpotData = (data: SpotInput) => {
   }
 
   // וולידציה של טווח מחירים
-  if (data.price_range && !['זול', 'בינוני', 'יקר'].includes(data.price_range)) {
+  if (data.price_range && !['חינם', 'זול', 'בינוני', 'יקר'].includes(data.price_range)) {
     throw new Error('טווח מחירים לא חוקי');
   }
 

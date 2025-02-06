@@ -217,6 +217,17 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters }) => 
               </div>
               <div className="grid grid-cols-1 gap-2">
                 <Button
+                  variant={filters.priceRanges.includes('חינם') ? 'default' : 'outline'}
+                  onClick={() => togglePriceRangeFilter('חינם')}
+                  className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${
+                    filters.priceRanges.includes('חינם') 
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600' 
+                      : 'hover:bg-emerald-100 hover:text-emerald-800 hover:border-emerald-300'
+                  }`}
+                >
+                  🆓 חינם
+                </Button>
+                <Button
                   variant={filters.priceRanges.includes('זול') ? 'default' : 'outline'}
                   onClick={() => togglePriceRangeFilter('זול')}
                   className={`justify-start transition-transform duration-200 hover:-translate-x-1 ${

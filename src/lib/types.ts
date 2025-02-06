@@ -2,7 +2,7 @@
 export type CategoryType = "מסעדה" | "בית קפה" | "בר" | "אטרקציה" | "טבע" | "אחר";
 export type RegionType = "ירושלים" | "מרכז" | "צפון" | "דרום";
 export type KosherType = "מהדרין" | "רבנות" | "?" | null;
-export type PriceRangeType = "זול" | "בינוני" | "יקר";
+export type PriceRangeType = "חינם" | "זול" | "בינוני" | "יקר";
 export type NoiseLevel = "שקט" | "בינוני" | "רועש"; 
 
 export interface Filters {

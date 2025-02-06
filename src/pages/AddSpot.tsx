@@ -328,13 +328,14 @@ export default function AddSpot() {
               <Label htmlFor="price_range">טווח מחירים</Label>
               <Select
                 value={newSpot.price_range}
-                onValueChange={(value: "זול" | "בינוני" | "יקר") => 
+                onValueChange={(value: "חינם" | "זול" | "בינוני" | "יקר") => 
                   setNewSpot({ ...newSpot, price_range: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="בחר טווח מחירים" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
+                  <SelectItem value="חינם">🆓 חינם</SelectItem>
                   <SelectItem value="זול">₪ זול</SelectItem>
                   <SelectItem value="בינוני">₪₪ בינוני</SelectItem>
                   <SelectItem value="יקר">₪₪₪ יקר</SelectItem>

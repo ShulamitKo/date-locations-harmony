@@ -453,13 +453,14 @@ export default function SpotDetails() {
                       <Label htmlFor="price_range">טווח מחירים</Label>
                       <Select
                         value={editedSpot?.price_range}
-                        onValueChange={(value: "זול" | "בינוני" | "יקר") => 
+                        onValueChange={(value: "חינם" | "זול" | "בינוני" | "יקר") => 
                           setEditedSpot(prev => prev ? { ...prev, price_range: value } : null)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="בחר טווח מחירים" />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
+                          <SelectItem value="חינם">🆓 חינם</SelectItem>
                           <SelectItem value="זול">₪ זול</SelectItem>
                           <SelectItem value="בינוני">₪₪ בינוני</SelectItem>
                           <SelectItem value="יקר">₪₪₪ יקר</SelectItem>
