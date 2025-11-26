@@ -23,5 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
+# Backup files
+bake
+cleaned_backup*.sql
+IMPORT_BACKUP_GUIDE.md
+RESTORE_INSTRUCTIONS.md
+UPDATE_TYPES.md
 
 .env
