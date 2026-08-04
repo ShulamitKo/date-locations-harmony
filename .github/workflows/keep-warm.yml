@@ -1,0 +1,71 @@
+name: keep-warm
+
+# Supabase pauses a free project after 7 days with no activity, and eventually
+# deletes it. This site is a portfolio piece, not a product with daily traffic,
+# so the clock ran out roughly every week. One tiny read per day resets it.
+#
+# Requires two repository secrets (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_URL       e.g. https://xxxxxxxxxxxx.supabase.co
+#   SUPABASE_ANON_KEY  the *anon/public* key, never the service_role key
+
+on:
+  schedule:
+    # 04:17 UTC = 07:17 Israel. Off-the-hour on purpose: GitHub delays cron jobs
+    # that fire on the hour, when everyone else's are queued.
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read one row from Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SUPABASE_URL}" ] || [ -z "${SUPABASE_ANON_KEY}" ]; then
+            echo "::error::SUPABASE_URL / SUPABASE_ANON_KEY are not set as repository secrets."
+            exit 1
+          fi
+
+          code=$(curl -sS -o /tmp/body -w '%{http_code}' --max-time 30 \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            "${SUPABASE_URL}/rest/v1/spots?select=id&limit=1")
+
+          echo "HTTP ${code}"
+          head -c 300 /tmp/body || true
+          echo
+
+          # Fail loudly. The old failure mode was silent: the database went away
+          # and nobody found out until a visitor hit an empty map.
+          if [ "${code}" != "200" ]; then
+            echo "::error::Supabase did not answer with 200 (got ${code}). The project is probably paused or gone."
+            exit 1
+          fi
+
+      - name: Record the run
+        # GitHub disables scheduled workflows in a repository that has had no
+        # activity for 60 days — which is exactly this repository. Writing a
+        # line here counts as activity, so the schedule stays alive.
+        run: |
+          set -euo pipefail
+          mkdir -p .github
+          date -u '+%Y-%m-%dT%H:%M:%SZ  ok' >> .github/last-warm.txt
+          # keep the file from growing forever
+          tail -n 120 .github/last-warm.txt > .github/last-warm.tmp
+          mv .github/last-warm.tmp .github/last-warm.txt
+
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .github/last-warm.txt
+          git commit -m 'chore: keep-warm ping' || exit 0
+          git push
