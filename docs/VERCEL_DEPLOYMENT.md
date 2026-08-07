@@ -18,12 +18,12 @@
 
 #### משתנה ראשון:
 - **Name**: `VITE_SUPABASE_URL`
-- **Value**: `https://iamgpzrpkybnzkthjcja.supabase.co`
+- **Value**: `https://<your-project-ref>.supabase.co`
 - **Environment**: סמני את כל האפשרויות (Production, Preview, Development)
 
 #### משתנה שני:
 - **Name**: `VITE_SUPABASE_ANON_KEY`
-- **Value**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhbWdwenJwa3libnprdGhqY2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODMzMTcsImV4cCI6MjA3OTA1OTMxN30.R7WYBMMIpblgiHk7d_9_J4hi4ZVN3gd6TkF21mPvBtw`
+- **Value**: `<your-supabase-anon-key>`
 - **Environment**: סמני את כל האפשרויות (Production, Preview, Development)
 
 ### שלב 3: פריסה מחדש (Redeploy)
