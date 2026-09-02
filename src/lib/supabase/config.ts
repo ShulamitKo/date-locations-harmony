@@ -10,6 +10,12 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
+/**
+ * כל הכתיבות עוברות דרך פונקציות SECURITY DEFINER בבסיס הנתונים
+ * (מיגרציה 20260902_harden_rls.sql). הטבלאות עצמן סגורות לכתיבה מהדפדפן,
+ * ולכן הוולידציה והגבלת הקצב אינן ניתנות לעקיפה על ידי פנייה ישירה ל-API.
+ */
+
 // Helper functions for spots
 export const spotsTable = {
   async getAll() {
@@ -26,15 +32,22 @@ export const spotsTable = {
       .from('spots')
       .select('*')
       .eq('id', id)
-      .single()
+      .maybeSingle()
+
     if (error) throw error
-    return data as Spot
+    if (data) return data as Spot
+
+    // מקום חסום אינו נראה בקריאה הציבורית - למנהלת יש מסלול נפרד
+    const { data: adminData, error: adminError } = await supabase
+      .rpc('admin_get_spot', { p_id: id })
+
+    if (adminError || !adminData) throw error ?? new Error('המקום לא נמצא במערכת')
+    return adminData as Spot
   },
 
   async create(spot: Omit<Spot, 'id' | 'created_at' | 'average_rating'>) {
-    const { data, error } = await supabase
-      .from('spots')
-      .insert([{
+    const { data, error } = await supabase.rpc('submit_spot', {
+      p: {
         name: spot.name,
         address: spot.address,
         phone: spot.phone || null,
@@ -54,16 +67,17 @@ export const spotsTable = {
         notes: spot.notes || null,
         latitude: spot.latitude,
         longitude: spot.longitude
-      }])
-      .select()
-      .single()
+      }
+    })
+
     if (error) throw error
     return data as Spot
   },
 
   async update(id: string, spot: Partial<Spot>) {
-    console.log('Attempting to update spot with ID:', id);
-    console.log('Update data:', spot);
+    if (!id) {
+      throw new Error('מזהה המקום חסר')
+    }
 
     // בדיקה אם המקום קיים
     const { data: existingSpot, error: checkError } = await supabase
@@ -84,6 +98,12 @@ export const spotsTable = {
     // הכנת הנתונים לעדכון
     const updateData = { ...spot };
 
+    // שדות שמנוהלים בשרת בלבד - לא נשלחים לעולם
+    delete (updateData as Record<string, unknown>).id;
+    delete (updateData as Record<string, unknown>).status;
+    delete (updateData as Record<string, unknown>).average_rating;
+    delete (updateData as Record<string, unknown>).created_at;
+
     // אם מעדכנים קטגוריה, צריך לטפל בכשרות בהתאם
     if (updateData.category) {
       if (['בית קפה', 'מסעדה', 'בר'].includes(updateData.category)) {
@@ -98,50 +118,34 @@ export const spotsTable = {
       updateData.kosher_type = updateData.kosher_type || existingSpot.kosher_type || '?';
     }
 
-    console.log('Final update data:', updateData);
-
-    // עדכון המקום
-    const { data, error } = await supabase
-      .from('spots')
-      .update(updateData)
-      .eq('id', id)
-      .select();
+    const { data, error } = await supabase.rpc('edit_spot', {
+      p_id: id,
+      p: updateData
+    });
 
     if (error) {
-      console.error('Error updating spot:', error);
-      console.error('Error details:', error.details);
-      console.error('Error hint:', error.hint);
-      console.error('Error message:', error.message);
+      console.error('Error updating spot:', error.message);
       throw error;
     }
 
-    if (!data || data.length === 0) {
-      console.error('No data returned after update');
+    if (!data) {
       throw new Error('העדכון נכשל - לא התקבל מידע מהשרת');
     }
 
-    console.log('Update successful, returned data:', data[0]);
-    return data[0] as Spot;
+    return data as Spot;
   },
 
   async delete(id: string) {
-    const { error } = await supabase
-      .from('spots')
-      .delete()
-      .eq('id', id)
+    const { error } = await supabase.rpc('admin_delete_spot', { p_id: id })
     if (error) throw error
   },
 
   async updateStatus(id: string, status: Spot['status']) {
-    const { data: spot, error } = await supabase
-      .from('spots')
-      .update({ status })
-      .eq('id', id)
-      .select()
-      .single();
+    const { data, error } = await supabase
+      .rpc('admin_set_spot_status', { p_id: id, p_status: status });
 
     if (error) throw error;
-    return spot;
+    return data as Spot;
   }
 }
 
@@ -158,114 +162,87 @@ export const reviewsTable = {
   },
 
   async create(review: Omit<Review, 'id' | 'createdAt'>) {
-    const { data, error } = await supabase
-      .from('reviews')
-      .insert([{
-        spot_id: review.spot_id,
-        reviewer_name: review.reviewer_name,
-        rating: review.rating,
-        content: review.content,
-        visit_date: review.visit_date || null
-      }])
-      .select()
-      .single()
+    const { data, error } = await supabase.rpc('submit_review', {
+      p_spot_id: review.spot_id,
+      p_reviewer_name: review.reviewer_name,
+      p_rating: review.rating,
+      p_content: review.content,
+      p_visit_date: review.visit_date || null
+    })
+
     if (error) throw error
     return data as Review
   }
 }
 
+/** מה ש-submit_report מחזיר: הדיווח שנוצר + מוני הדיווחים הפתוחים למקום */
+export interface ReportSubmission {
+  id: string;
+  spot_id: string;
+  report_type: Report['report_type'];
+  status: Report['status'];
+  created_at: string;
+  open_pending: number;
+  open_in_review: number;
+  open_total: number;
+}
+
 export const reportsTable = {
   async getAll() {
-    const { data: reports, error } = await supabase
-      .from('reports')
-      .select('*')
-      .order('created_at', { ascending: false });
-
+    const { data, error } = await supabase.rpc('admin_list_reports');
     if (error) throw error;
-    return reports;
+    return (data ?? []) as Report[];
   },
 
-  async create(data: Omit<Report, 'id' | 'created_at' | 'updated_at' | 'status'>) {
-    const { data: report, error } = await supabase
-      .from('reports')
-      .insert({
-        ...data,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select()
-      .single();
+  async create(
+    data: Pick<Report, 'spot_id' | 'report_type' | 'description'>
+  ): Promise<ReportSubmission> {
+    // reporter_ip נקבע בשרת מתוך כתובת הפנייה האמיתית - לא נשלח מהדפדפן
+    const { data: report, error } = await supabase.rpc('submit_report', {
+      p_spot_id: data.spot_id,
+      p_report_type: data.report_type,
+      p_description: data.description
+    });
 
     if (error) throw error;
-    return report;
-  },
-
-  async getById(id: string) {
-    const { data: report, error } = await supabase
-      .from('reports')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) throw error;
-    return report;
+    return report as ReportSubmission;
   },
 
   async getBySpotId(spotId: string) {
-    const { data: reports, error } = await supabase
-      .from('reports')
-      .select('*')
-      .eq('spot_id', spotId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return reports;
+    const all = await this.getAll();
+    return all.filter(r => r.spot_id === spotId);
   },
 
   async updateStatus(id: string, status: Report['status'], adminNotes?: string) {
-    const { data: report, error } = await supabase
-      .from('reports')
-      .update({
-        status,
-        admin_notes: adminNotes,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select()
-      .single();
+    const { data, error } = await supabase.rpc('admin_update_report_status', {
+      p_id: id,
+      p_status: status,
+      p_notes: adminNotes ?? null
+    });
 
     if (error) throw error;
-    return report;
+    return data as Report;
   }
 };
 
 export const adminTable = {
+  /**
+   * שער הניהול. ה-IP נקבע בשרת בלבד (public.is_admin) -
+   * הלקוח לא מעביר ולא יכול להשפיע על התשובה.
+   */
   async checkAccess() {
-    console.log('מתחיל בדיקת הרשאות בסופאבייס...');
-    
     try {
-      const response = await fetch('https://api.ipify.org?format=json');
-      const ipData = await response.json();
-      console.log('ה-IP שלנו:', ipData.ip);
-      
-      // קריאה ל-RPC עם ה-IP כפרמטר
-      const { data, error } = await supabase
-        .rpc('check_admin_access', {
-          client_ip: ipData.ip
-        });
-      
+      const { data, error } = await supabase.rpc('is_admin');
+
       if (error) {
-        console.error('שגיאה בקריאה ל-RPC:', error);
-        throw error;
+        console.error('שגיאה בבדיקת הרשאות:', error.message);
+        return false;
       }
-      
-      console.log('תשובה מסופאבייס:', data);
-      return data as boolean;
-      
+
+      return data === true;
     } catch (error) {
       console.error('שגיאה בתהליך בדיקת ההרשאות:', error);
       return false;
     }
   }
-}; 
+};

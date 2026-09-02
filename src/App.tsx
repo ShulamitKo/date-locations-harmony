@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Analytics } from '@vercel/analytics/react';
 import HomePage from "./pages/HomePage";
 import SpotDetails from "./pages/SpotDetails";
-import Admin from "./pages/Admin";
 import AddSpot from "./pages/AddSpot";
 import Footer from '@/components/Footer'
 import AdminReports from "./pages/AdminReports";
@@ -72,8 +71,7 @@ const App = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/spot/:id" element={<SpotDetails />} />
             <Route path="/add-spot" element={<AddSpot />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route 
+            <Route
               path="/admin/reports" 
               element={
                 <ProtectedRoute>

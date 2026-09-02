@@ -31,3 +31,18 @@ RESTORE_INSTRUCTIONS.md
 UPDATE_TYPES.md
 
 .env
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Supabase CLI temp state
+supabase/.temp/
+supabase/.branches/
+
+# Local database dumps
+cleaned_backup*.sql
+.vscode/
+
+.vercel
+.env*.local
