@@ -43,3 +43,6 @@ supabase/.branches/
 # Local database dumps
 cleaned_backup*.sql
 .vscode/
+
+.vercel
+.env*.local
