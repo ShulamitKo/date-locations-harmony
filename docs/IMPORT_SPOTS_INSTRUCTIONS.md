@@ -5,7 +5,7 @@
 ### איך להריץ:
 
 1. פתח את הדשבורד של Supabase:
-   https://supabase.com/dashboard/project/iamgpzrpkybnzkthjcja
+   https://supabase.com/dashboard/project/<project-ref>
 
 2. לך ל-SQL Editor (בתפריט הצד)
 
