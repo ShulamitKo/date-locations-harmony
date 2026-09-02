@@ -19,8 +19,7 @@ import Map from '@/components/Map'
 import { logEvent } from "@/lib/logging";
 import { type KosherType } from '@/lib/types';
 import { ReportButton } from '@/components/ReportButton';
-import { checkRateLimit } from '@/lib/rateLimit';
-import { useUserIp } from '@/lib/hooks/useUserIp';
+import { isRateLimitError } from '@/lib/rateLimit';
 
 interface ReviewForm {
   reviewer_name: string;
@@ -69,7 +68,6 @@ export default function SpotDetails() {
     content: '',
     visit_date: ''
   });
-  const { userIp } = useUserIp();
 
   useEffect(() => {
     const loadSpotAndReviews = async () => {
@@ -95,25 +93,7 @@ export default function SpotDetails() {
   const handleSave = async () => {
     if (!editedSpot || !spot) return;
     
-    // בדיקת מגבלת קצב
-    if (!userIp) {
-      toast({
-        title: 'שגיאה בעדכון המקום',
-        description: 'לא ניתן לזהות את כתובת ה-IP שלך',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const rateLimitCheck = await checkRateLimit('editSpot', userIp);
-    if (!rateLimitCheck.allowed) {
-      toast({
-        title: 'לא ניתן לערוך מקום כרגע',
-        description: 'נסה שוב מאוחר יותר',
-        variant: 'destructive',
-      });
-      return;
-    }
+    // הגבלת הקצב והוולידציה נאכפות בשרת (public.edit_spot)
     
     // בדיקת תקינות המזהה
     if (!editedSpot.id) {
@@ -193,25 +173,7 @@ export default function SpotDetails() {
     e.preventDefault();
     if (!spot || !reviewForm) return;
 
-    // בדיקת מגבלת קצב
-    if (!userIp) {
-      toast({
-        title: 'שגיאה בהוספת הביקורת',
-        description: 'לא ניתן לזהות את כתובת ה-IP שלך',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const rateLimitCheck = await checkRateLimit('review', userIp);
-    if (!rateLimitCheck.allowed) {
-      toast({
-        title: 'לא ניתן להוסיף ביקורת כרגע',
-        description: 'נסה שוב מאוחר יותר',
-        variant: 'destructive',
-      });
-      return;
-    }
+    // הגבלת הקצב והוולידציה נאכפות בשרת (public.submit_review)
 
     try {
       const newReview = await reviewsTable.create({
@@ -238,8 +200,10 @@ export default function SpotDetails() {
     } catch (error) {
       console.error('Error submitting review:', error);
       toast({
-        title: 'שגיאה בהוספת הביקורת',
-        description: 'אנא נסה שוב מאוחר יותר',
+        title: isRateLimitError(error) ? 'לא ניתן להוסיף ביקורת כרגע' : 'שגיאה בהוספת הביקורת',
+        description: error instanceof Error && error.message
+          ? error.message
+          : 'אנא נסה שוב מאוחר יותר',
         variant: 'destructive'
       });
     }

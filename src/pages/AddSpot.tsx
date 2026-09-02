@@ -13,8 +13,7 @@ import { CategoryType, RegionType, PriceRangeType, NoiseLevel, KosherType } from
 import { spotsTable } from '@/lib/supabase/config'
 import { logEvent } from '@/lib/logging'
 import Map from '@/components/Map'
-import { checkRateLimit } from '@/lib/rateLimit'
-import { useUserIp } from '@/lib/hooks/useUserIp'
+import { isRateLimitError } from '@/lib/rateLimit'
 
 // טיפוס עזר שממיר שדות null לstring ריק
 type FormSpot = {
@@ -43,7 +42,6 @@ type FormSpot = {
 export default function AddSpot() {
   const navigate = useNavigate()
   const { toast } = useToast()
-  const { userIp } = useUserIp()
   
   const [newSpot, setNewSpot] = useState<FormSpot>({
     name: "",
@@ -87,25 +85,9 @@ export default function AddSpot() {
     e.preventDefault();
     
     // בדיקת מגבלת קצב
-    if (!userIp) {
-      toast({
-        title: "שגיאה בהוספת המקום",
-        description: "לא ניתן לזהות את כתובת ה-IP שלך",
-        variant: "destructive",
-      });
-      return;
-    }
+    // הגבלת הקצב נאכפת בשרת (public.rl_hit) לפי ה-IP האמיתי של הפנייה.
+    // חריגה ממכסה חוזרת כשגיאה מטופלת ב-catch שלמטה.
 
-    const rateLimitCheck = await checkRateLimit('addSpot', userIp);
-    if (!rateLimitCheck.allowed) {
-      toast({
-        title: "לא ניתן להוסיף מקום כרגע",
-        description: "נסה שוב מאוחר יותר",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     // Check if location is selected (not default coordinates)
     if (newSpot.latitude === 32.0853 && newSpot.longitude === 34.7818) {
       toast({
@@ -156,8 +138,10 @@ export default function AddSpot() {
       }, 'error');
       
       toast({
-        title: "שגיאה בהוספת המקום",
-        description: "אנא נסה שנית מאוחר יותר",
+        title: isRateLimitError(error) ? "לא ניתן להוסיף מקום כרגע" : "שגיאה בהוספת המקום",
+        description: error instanceof Error && error.message
+          ? error.message
+          : "אנא נסה שנית מאוחר יותר",
         variant: "destructive",
       });
     }

@@ -12,7 +12,7 @@ import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 // רשימת IP-ים מורשים
 //const ALLOWED_IPS = ['YOUR_IP_HERE']; // החלף עם ה-IP שלך
 
-type ReportWithSpot = Report & { spot: Spot | null };
+type ReportWithSpot = Omit<Report, 'spot'> & { spot: Spot | null };
 
 export default function AdminReports() {
   const [reports, setReports] = useState<ReportWithSpot[]>([]);

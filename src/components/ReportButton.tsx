@@ -8,8 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Flag, Loader2 } from 'lucide-react';
 import { reportsTable, spotsTable } from '@/lib/supabase/config';
 import { EMAIL_STYLES } from './email-styles';
-import { checkRateLimit } from '@/lib/rateLimit';
-import { useUserIp } from '@/lib/hooks/useUserIp';
+import { isRateLimitError } from '@/lib/rateLimit';
 
 const REPORT_TYPES = [
   { value: 'spam', label: 'תוכן זבל/ספאם' },
@@ -34,7 +33,6 @@ export function ReportButton({ spotId, spotName, className, onReportSubmitted }:
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { userIp } = useUserIp();
 
   const sendEmail = async (formData: Record<string, string>) => {
     const tempForm = document.createElement('form');
@@ -67,34 +65,16 @@ export function ReportButton({ spotId, spotName, className, onReportSubmitted }:
       return;
     }
 
-    if (!userIp) {
-      toast({
-        title: "שגיאה בשליחת הדיווח",
-        description: "לא ניתן לזהות את כתובת ה-IP שלך",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // בדיקת מגבלת קצב
-    const rateLimitCheck = await checkRateLimit('report', userIp);
-    if (!rateLimitCheck.allowed) {
-      toast({
-        title: "לא ניתן לשלוח דיווח כרגע",
-        description: "נסה שוב מאוחר יותר",
-        variant: "destructive"
-      });
-      return;
-    }
+    // הגבלת הקצב נאכפת בשרת (public.submit_report), לפי ה-IP האמיתי של הפנייה
 
     try {
       setIsSubmitting(true);
 
+      // reporter_ip נקבע בשרת. הלקוח לא שולח אותו ולא קורא את טבלת הדיווחים.
       const report = await reportsTable.create({
         spot_id: spotId,
         report_type: reportType,
-        description: description,
-        reporter_ip: userIp
+        description: description
       });
 
       // שליחת מייל על הדיווח החדש
@@ -106,16 +86,11 @@ export function ReportButton({ spotId, spotName, className, onReportSubmitted }:
         'מקום': spotName,
         'סוג דיווח': reportType,
         'תיאור': description,
-        'IP המדווח': userIp,
         'מזהה דיווח': report.id
       });
 
-      // בדיקת כמות הדיווחים הפתוחים למקום
-      const reports = await reportsTable.getBySpotId(spotId);
-      const openReports = reports.filter(r => r.status === 'pending' || r.status === 'in_review');
-
-      // אם יש 3 דיווחים או יותר, שליחת מייל נוסף
-      if (openReports.length >= 3) {
+      // מוני הדיווחים הפתוחים מגיעים מהשרת יחד עם הדיווח שנוצר
+      if (report.open_total >= 3) {
         const spot = await spotsTable.getById(spotId);
         
         // שליחת מייל על מעבר לסטטוס בדיקת מנהלים
@@ -127,16 +102,10 @@ export function ReportButton({ spotId, spotName, className, onReportSubmitted }:
           'שם המקום': spotName,
           'כתובת': spot.address,
           'קטגוריה': spot.category,
-          'כמות דיווחים פתוחים': openReports.length.toString(),
-          'דיווחים ממתינים': reports.filter(r => r.status === 'pending').length.toString(),
-          'דיווחים בבדיקה': reports.filter(r => r.status === 'in_review').length.toString(),
-          //'קישור למערכת': window.location.origin + '/admin/reports',
-          'פירוט הדיווחים': openReports.map(r => `
-            סוג: ${r.report_type}
-            תיאור: ${r.description}
-            סטטוס: ${r.status}
-            תאריך: ${new Date(r.created_at).toLocaleDateString('he-IL')}
-          `).join('\n')
+          'כמות דיווחים פתוחים': report.open_total.toString(),
+          'דיווחים ממתינים': report.open_pending.toString(),
+          'דיווחים בבדיקה': report.open_in_review.toString(),
+          'לפירוט מלא': 'מסך הניהול /admin/reports'
         });
       }
 
@@ -154,8 +123,10 @@ export function ReportButton({ spotId, spotName, className, onReportSubmitted }:
     } catch (error) {
       console.error('Error submitting report:', error);
       toast({
-        title: "שגיאה בשליחת הדיווח",
-        description: "אנא נסה שוב מאוחר יותר",
+        title: isRateLimitError(error) ? "לא ניתן לשלוח דיווח כרגע" : "שגיאה בשליחת הדיווח",
+        description: error instanceof Error && error.message
+          ? error.message
+          : "אנא נסה שוב מאוחר יותר",
         variant: "destructive"
       });
     } finally {
